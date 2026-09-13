@@ -271,6 +271,32 @@ If the underlying application supports it, an adapter could provide a way to res
 
 This does not assume that every application has perfect undo support. Rollback may need to be implemented differently depending on the application.
 
+Two mechanisms are implemented, and a result says which one was used:
+
+```
+compensation
+    → apply an inverse action, history moves forward
+      set_text("Board Update")  →  set_text("Quarterly Review")
+
+snapshot
+    → restore a recorded state, history moves back
+      used when the adapter cannot express an inverse
+```
+
+Compensation is the one that could survive contact with real software, where the IR does not own the document and cannot simply overwrite it. Snapshot restore is the fallback. Asking an adapter to declare which one it can offer is more honest than assuming undo works.
+
+A batch either lands completely or leaves no changes behind:
+
+```
+move      accepted
+set_locked accepted
+set_fill  rejected  (invalid color)
+    ↓
+revision unchanged, both accepted actions reverted
+```
+
+Later actions can depend on earlier effects, so a batch is validated one action at a time and an already-applied prefix is reverted rather than prevented.
+
 The goal is simply to explore whether explicit revisions can make AI-driven changes easier to inspect and recover from.
 
 ## Adapters
@@ -365,6 +391,17 @@ MCP can provide the mechanism through which an AI discovers and calls tools. The
 
 The project does not attempt to replace MCP. MCP could be one way to expose or transport the IR.
 
+To check that this is actually true rather than assumed, an adapter catalog can be projected as typed tool descriptors:
+
+```
+slides.create_shape   required: kind, x, y, width, height
+slides.group          required: ids
+scir.transaction      required: actions
+scir.undo             required: -
+```
+
+The projection is mechanical, so the IR stays the single source of validation and state. Tool results are deliberately compact: an agent that already holds the state does not need two more copies of it returned to it.
+
 ## How is this different from OpenAPI or JSON-RPC?
 
 OpenAPI and JSON-RPC are useful for describing and calling APIs. This project is interested in questions that can exist above that level:
@@ -420,14 +457,19 @@ Software Control IR
 Blender App B App C
 ```
 
-A conformance test could check whether an adapter:
+The shared checks currently ask whether an adapter:
 
 1. Resolves the requested target correctly
-2. Validates the operation
+2. Rejects an invalid action without mutating anything
 3. Performs the operation
-4. Reports the resulting state
+4. Reports the resulting state and effects
 5. Creates a revision when supported
 6. Restores the previous state when supported
+7. Describes its own capabilities and object types
+8. Leaves no changes behind when a batch aborts
+9. Undoes the newest revision and says which mechanism it used
+
+Both adapters pass all of them, and they do not pass them the same way: slides falls back to a snapshot restore where lab can compensate with an inverse action. That difference is the point of running the same checks against both.
 
 This is currently a proposed direction, not an established specification.
 
@@ -476,11 +518,25 @@ This repository currently includes:
 
 - a minimal IR for state, action, validation, effect, revision, and rollback
 - a `Session` runtime that validates before mutate
-- a first adapter: an in-memory **lab scene** (`heater` / `vessel`)
-- shared conformance checks
+- a small **common core**: `select`, `set_locked`, `delete`
+- atomic batches, and undo that reports whether it compensated or restored a snapshot
+- a **lab** adapter (`heater` / `vessel`) as the original stand-in
+- a **slides** adapter with PPT-like domain operations: `create_shape`, `set_fill`, `set_text`, `resize`, `align`
+- relevant-state slices that walk the object tree (current slide, not the whole deck)
+- PPT-like domain extras on slides: `duplicate`, `bring_to_front`, `send_to_back`, `group`, `ungroup`
+- adapter self-description, so an agent can read capabilities instead of probing for them
+- the catalog projected as typed tool descriptors, with a dispatcher
+- action traces that can be replayed
+- a measurement harness: structured vs naive scripts, rollback recovery, batch atomicity, and state size
+- shared conformance checks against both adapters
+- a JSON schema that real session output is tested against
 - a local demo that places pixel space next to structured state
 
-That lab adapter is a stand-in, not the destination. The next useful step is an adapter against real software.
+On a 48-object deck, the relevant slice is 6 objects and about 13% of the tokens of the full document. That is a measurement of the representation, not of an agent; it says how much state an agent would be handed, not how well it would then perform.
+
+The slides adapter is still in-memory. It is a software-shaped surface, not Microsoft PowerPoint. Resize here means a bounding box, which is intentionally not Blender scale or a CAD constraint. Grouping is the clearest case so far of a domain operation the common core should never learn: it is a slide concept, it has no single inverse action, and `delete` correctly refuses a group that still has members.
+
+The next useful step is an adapter against real software.
 
 ## Design principles
 
@@ -499,9 +555,15 @@ That lab adapter is a stand-in, not the destination. The next useful step is an 
 - [x] Add revision tracking
 - [x] Explore rollback
 - [x] Build the first application adapter (lab scene stand-in)
+- [x] Add a software-shaped adapter (slides / PPT-like operations)
 - [x] Create basic conformance tests
-- [ ] Benchmark against existing approaches
+- [x] Add a first measurement harness (scripted structured vs naive, not yet vs a vision model)
+- [x] Add atomic batches and inverse-action recovery
+- [x] Measure the size of full state against the relevant slice
+- [x] Project the catalog as tool descriptors, so a transport can carry the IR
+- [x] Test the published schema against real session output
 - [ ] Build an adapter against real software
+- [ ] Benchmark against existing approaches
 - [ ] Refine the IR based on actual implementations
 
 ## What this is not
@@ -523,11 +585,22 @@ It is an experiment around a possible missing layer between AI agents and existi
 ```bash
 npm install
 npm test
+npm run typecheck
 npm run example
+npm run example:slides
+npm run conformance
+npm run tools
+npm run bench
 npm run dev
 ```
 
-`npm run dev` opens the lab demo. The left panel is pixel space. The right panel is the IR. Actions are validated before they change the scene; rejected actions do not create revisions.
+`npm run bench` runs scripted policies against the slides adapter. It does not yet compare IR to a vision model. It measures invalid actions, goal checks, rollback, batch atomicity, and state size on known tasks.
+
+`npm run conformance` prints the shared checks for both adapters, including which recovery mechanism each one used.
+
+`npm run tools` prints the catalog as tool descriptors and runs a few calls through the dispatcher.
+
+`npm run dev` opens a demo with pixel space next to structured state. The default adapter is slides: `create_shape` is a catalog operation, not a drawing primitive. Toggle **relevant only** to see the current slide instead of the whole deck, with the token cost of each shown above the state. Shift-click marks shapes to **Group**. Pasting an array into the action box applies it as one atomic batch, and **Load a batch that must abort** sets up a batch whose accepted prefix gets reverted. **as tools** shows what an agent would be handed. **Measure** runs the harness in the result panel.
 
 ## License
 

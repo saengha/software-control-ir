@@ -20,9 +20,15 @@
           <h1>Software Control IR</h1>
           <p class="lede">Software already knows what it is. AI shouldn't have to figure it out from a screenshot.</p>
         </div>
-        <div class="rev-meter" aria-live="polite">
-          <span class="label">Revision</span>
-          <strong id="revision">0</strong>
+        <div class="mast-side">
+          <div class="switch" role="group" aria-label="Adapter">
+            <button id="mode-slides" type="button" class="on">Slides</button>
+            <button id="mode-lab" type="button">Lab</button>
+          </div>
+          <div class="rev-meter" aria-live="polite">
+            <span class="label">Revision</span>
+            <strong id="revision">0</strong>
+          </div>
         </div>
       </header>
 
@@ -32,15 +38,36 @@
             <span>Pixel space</span>
             <span class="hint">what a vision agent would see</span>
           </div>
-          <canvas id="scene" width="840" height="420"></canvas>
-          <p class="caption">Drag unlocked objects. Clicks become <code>select</code>. Drops become <code>move</code>.</p>
+          <div id="toolbar" class="toolbar">
+            <button type="button" data-kind="rectangle">Rectangle</button>
+            <button type="button" data-kind="ellipse">Ellipse</button>
+            <button type="button" data-kind="textbox">Text box</button>
+            <button type="button" id="align-center">Align center</button>
+            <button type="button" id="duplicate">Duplicate</button>
+            <button type="button" id="bring-front">Front</button>
+            <button type="button" id="send-back">Back</button>
+            <button type="button" id="group">Group</button>
+            <button type="button" id="ungroup">Ungroup</button>
+            <button type="button" data-slide="slide_01">Slide 1</button>
+            <button type="button" data-slide="slide_02">Slide 2</button>
+            <button type="button" id="measure">Measure</button>
+          </div>
+          <canvas id="scene" width="960" height="540"></canvas>
+          <p class="caption" id="caption">
+            Shapes are created through <code>create_shape</code>, not by painting pixels. Drag moves. Corner handle
+            resizes. The catalog is PPT-like, not a universal drawing language.
+          </p>
         </section>
 
         <section class="panel structure">
           <div class="panel-head">
             <span>Structured state</span>
-            <span class="hint">what the IR exposes</span>
+            <label class="inline">
+              <input id="relevant" type="checkbox" checked />
+              relevant only
+            </label>
           </div>
+          <p class="hint size" id="size"></p>
           <pre id="state"></pre>
         </section>
       </main>
@@ -49,7 +76,7 @@
         <div class="panel">
           <div class="panel-head">
             <span>Action</span>
-            <span class="hint">validate → execute → effect</span>
+            <button id="tools" type="button" class="link">as tools</button>
           </div>
           <div class="composer">
             <label>
@@ -67,6 +94,8 @@
             <button id="apply" type="button">Apply</button>
           </div>
           <textarea id="raw" spellcheck="false"></textarea>
+          <button id="batch" type="button" class="wide">Load a batch that must abort</button>
+          <p class="caption">An array is applied as one atomic batch: all of it lands, or none of it does.</p>
         </div>
 
         <div class="panel">
@@ -83,7 +112,10 @@
             <span class="hint">click to rollback</span>
           </div>
           <ol id="history"></ol>
-          <button id="reset" type="button">Rollback to 0</button>
+          <div class="row">
+            <button id="undo" type="button">Undo</button>
+            <button id="reset" type="button">Rollback to 0</button>
+          </div>
         </div>
       </section>
     </div>

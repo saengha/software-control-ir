@@ -21,6 +21,10 @@ Not a replacement for MCP, OpenAPI, application APIs, GUI automation, or a unive
 
 - Prefer a smaller IR that survives contact with software over a larger vocabulary that looks complete.
 - Do not add operations to the common core unless two adapters need the same semantic.
+- Domain catalogs may name similar ideas differently. `resize` on slides is a bounding box, not a universal command.
 - Invalid actions must be rejected before adapter state changes.
 - Every accepted action should report effects and a revision.
+- A recovery must say how it recovered. An inverse action and a snapshot restore are not the same promise, and a real application may only offer one of them.
+- A batch must leave no changes behind when it aborts.
+- Test the published schema against real session output, or delete the schema.
 - The first adapter should stay complete enough to measure, not broad enough to impress.
