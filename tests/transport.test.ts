@@ -78,7 +78,26 @@ describe("catalog projected as tools", () => {
     const description = createDispatcher(session)("scir.describe") as Record<string, unknown>;
     expect(description).toMatchObject({
       adapter: "slides",
-      capabilities: { transactions: true, compensation: true, relevantState: true, hierarchy: true },
+      capabilities: {
+        transactions: true,
+        compensation: true,
+        snapshotRestore: true,
+        relevantState: true,
+        hierarchy: true,
+      },
     });
+  });
+
+  it("rejects a stale expectedRevision through the dispatcher", () => {
+    const session = new Session(new SlidesAdapter());
+    const call = createDispatcher(session);
+    call("slides.set_text", { target: "title_01", value: "First" });
+    const stale = call("slides.set_text", {
+      target: "title_01",
+      value: "Second",
+      expectedRevision: 0,
+    }) as Record<string, unknown>;
+    expect(stale).toMatchObject({ status: "rejected" });
+    expect((stale.issues as { code: string }[])[0]?.code).toBe("stale_revision");
   });
 });

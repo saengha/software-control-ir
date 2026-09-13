@@ -13,13 +13,16 @@ export function compactResult(result: ActionResult): CompactResult {
   return compact;
 }
 
-export function compactTransaction(result: TransactionResult): CompactResult & { rolledBack: boolean } {
-  const compact: CompactResult & { rolledBack: boolean } = {
+export function compactTransaction(
+  result: TransactionResult,
+): CompactResult & { rolledBack: boolean; recovery?: TransactionResult["recovery"] } {
+  const compact: CompactResult & { rolledBack: boolean; recovery?: TransactionResult["recovery"] } = {
     status: result.status,
     revision: result.revision,
     effects: result.effects,
     rolledBack: result.rolledBack,
   };
   if (result.issues) compact.issues = result.issues;
+  if (result.recovery) compact.recovery = result.recovery;
   return compact;
 }

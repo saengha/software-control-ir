@@ -34,7 +34,8 @@
       "properties": {
         "action": { "type": "string", "minLength": 1 },
         "target": { "$ref": "#/$defs/objectId" },
-        "params": { "type": "object", "additionalProperties": true }
+        "params": { "type": "object", "additionalProperties": true },
+        "expectedRevision": { "type": "integer", "minimum": 0 }
       },
       "additionalProperties": true
     },
@@ -95,6 +96,7 @@
         "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
         "results": { "type": "array", "items": { "$ref": "#/$defs/result" } },
         "rolledBack": { "type": "boolean" },
+        "recovery": { "enum": ["compensation", "snapshot"] },
         "issues": { "type": "array", "items": { "$ref": "#/$defs/issue" } }
       },
       "additionalProperties": false
@@ -102,10 +104,11 @@
     "capabilities": {
       "description": "What an adapter can do, so an agent does not have to probe for it.",
       "type": "object",
-      "required": ["transactions", "compensation", "relevantState", "hierarchy"],
+      "required": ["transactions", "compensation", "snapshotRestore", "relevantState", "hierarchy"],
       "properties": {
         "transactions": { "type": "boolean" },
         "compensation": { "type": "boolean" },
+        "snapshotRestore": { "type": "boolean" },
         "relevantState": { "type": "boolean" },
         "hierarchy": { "type": "boolean" }
       },

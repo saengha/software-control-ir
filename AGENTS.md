@@ -25,6 +25,9 @@ Not a replacement for MCP, OpenAPI, application APIs, GUI automation, or a unive
 - Invalid actions must be rejected before adapter state changes.
 - Every accepted action should report effects and a revision.
 - A recovery must say how it recovered. An inverse action and a snapshot restore are not the same promise, and a real application may only offer one of them.
-- A batch must leave no changes behind when it aborts.
+- Do not advertise snapshot restore unless the adapter can actually overwrite the host document. Inverse-only recovery moves the revision forward.
+- Host-owned documents can change out of band. Detect that drift, refuse further actions, and require an explicit sync.
+- A batch must leave no changes behind when it aborts. If it cannot, say the state is dirty instead of claiming atomicity.
 - Test the published schema against real session output, or delete the schema.
 - The first adapter should stay complete enough to measure, not broad enough to impress.
+- A real application owns its document. Do not advertise snapshot restore unless the adapter can actually overwrite the host.

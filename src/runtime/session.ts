@@ -1,6 +1,6 @@
 import { diffStates, focusFor } from "../ir/diff.js";
 import { measureState } from "../ir/measure.js";
-import { cloneJson, normalizeAction } from "../ir/normalize.js";
+import { cloneJson, normalizeAction, sameJson } from "../ir/normalize.js";
 import { selectRelevant } from "../ir/query.js";
 import { validateAction } from "../ir/validate.js";
 import type {
@@ -10,6 +10,7 @@ import type {
   AdapterState,
   AttemptRecord,
   Capabilities,
+  RecoveryMechanism,
   RevisionRecord,
   RunMetrics,
   State,
@@ -33,8 +34,24 @@ function stamp(inner: AdapterState, revision: number): State {
   return state;
 }
 
-function issue(code: string, message: string): ValidationIssue {
-  return { code, message };
+function issue(code: string, message: string, path?: string): ValidationIssue {
+  const next: ValidationIssue = { code, message };
+  if (path) next.path = path;
+  return next;
+}
+
+function toAdapterState(state: Pick<AdapterState, "objects" | "selection"> & { meta?: AdapterState["meta"] }): AdapterState {
+  const next: AdapterState = { objects: state.objects, selection: state.selection };
+  if (state.meta !== undefined) next.meta = state.meta;
+  return next;
+}
+
+function sameAdapterState(left: AdapterState, right: AdapterState): boolean {
+  return (
+    sameJson(left.objects, right.objects) &&
+    sameJson(left.selection, right.selection) &&
+    sameJson(left.meta ?? null, right.meta ?? null)
+  );
 }
 
 export class Session {
@@ -55,9 +72,10 @@ export class Session {
     return this.adapter.catalog();
   }
 
+  /** Live adapter state, stamped with the last revision the IR acknowledged. */
   snapshot(query?: StateQuery): State {
-    const inner = query ? this.adapter.snapshot(query) : this.snapshots[this.current];
-    return stamp(inner ?? this.adapter.snapshot(), this.current);
+    const inner = query ? this.adapter.snapshot(query) : this.adapter.snapshot();
+    return stamp(inner, this.current);
   }
 
   relevant(): State {
@@ -71,9 +89,12 @@ export class Session {
   describe(): AdapterDescription {
     const catalog = this.catalog();
     const state = this.snapshot();
+    const compensation = typeof this.adapter.inverse === "function";
+    const snapshotRestore = this.canRestore();
     const base: Capabilities = {
-      transactions: true,
-      compensation: typeof this.adapter.inverse === "function",
+      transactions: snapshotRestore || compensation,
+      compensation,
+      snapshotRestore,
       relevantState: selectRelevant(state).objects.length < state.objects.length,
       hierarchy: state.objects.some((object) => object.parent !== undefined),
     };
@@ -122,9 +143,53 @@ export class Session {
   }
 
   /**
+   * Re-acknowledge whatever the host currently has. Use this after the
+   * application changed out of band, or after a `host_diverged` rejection.
+   */
+  sync(): ActionResult {
+    const before = stamp(this.acknowledged(), this.current);
+    const live = this.adapter.snapshot();
+    const action: Action = { action: "sync", params: {} };
+
+    if (sameAdapterState(this.acknowledged(), live)) {
+      const after = stamp(live, this.current);
+      return this.record({
+        status: "accepted",
+        action,
+        revision: this.current,
+        before,
+        after,
+        effects: [],
+      });
+    }
+
+    this.current += 1;
+    this.snapshots.push(cloneJson(live));
+    const after = stamp(live, this.current);
+    const effects = diffStates(before, after);
+    this.log.push({
+      revision: this.current,
+      timestamp: new Date().toISOString(),
+      action,
+      effects,
+    });
+    return this.record({
+      status: "accepted",
+      action,
+      revision: this.current,
+      before,
+      after,
+      effects,
+    });
+  }
+
+  /**
    * Apply a batch that either lands completely or leaves no changes behind.
    * Later actions can depend on earlier effects, so actions are validated one at
-   * a time and an already-applied prefix is reverted rather than prevented.
+   * a time. An already-applied prefix is reverted by snapshot when the adapter
+   * offers that, otherwise by inverse actions. Inverse-only recovery moves the
+   * revision forward. If neither mechanism can restore the prefix, the result
+   * says so instead of pretending the batch was atomic.
    */
   transaction(raws: unknown[]): TransactionResult {
     const start = this.current;
@@ -136,19 +201,38 @@ export class Session {
       results.push(result);
       if (result.status === "accepted") continue;
 
-      const reverted = this.current > start;
-      if (reverted) this.rollback(start);
+      if (this.current === start) {
+        return {
+          status: result.status,
+          revision: this.current,
+          before,
+          after: this.snapshot(),
+          effects: [],
+          results,
+          rolledBack: false,
+          issues: result.issues ?? [issue("transaction_aborted", "Batch aborted before completion")],
+        };
+      }
+
+      const recovered = this.revertTo(start);
       const after = this.snapshot();
-      return {
-        status: result.status,
+      const aborted: TransactionResult = {
+        status: recovered.ok ? result.status : "failed",
         revision: this.current,
         before,
         after,
-        effects: [],
+        effects: recovered.ok ? [] : diffStates(before, after),
         results,
-        rolledBack: reverted,
-        issues: result.issues ?? [issue("transaction_aborted", "Batch aborted before completion")],
+        rolledBack: recovered.ok,
+        issues: recovered.ok
+          ? (result.issues ?? [issue("transaction_aborted", "Batch aborted before completion")])
+          : [
+              ...(result.issues ?? []),
+              issue("dirty_state", "Batch aborted and the prefix could not be restored"),
+            ],
       };
+      if (recovered.ok) aborted.recovery = recovered.recovery;
+      return aborted;
     }
 
     const after = this.snapshot();
@@ -165,7 +249,7 @@ export class Session {
 
   /**
    * Undo the newest revision. Uses an inverse catalog action when the adapter
-   * can express one, and a snapshot restore when it cannot.
+   * can express one, and a snapshot restore only when that is a declared capability.
    */
   undo(): ActionResult {
     const before = this.snapshot();
@@ -181,9 +265,21 @@ export class Session {
       });
     }
 
+    const drift = this.driftIssue(before);
+    if (drift) {
+      return this.record({
+        status: "rejected",
+        action: { action: "undo", params: {} },
+        revision: this.current,
+        before,
+        after: before,
+        effects: [],
+        issues: [drift],
+      });
+    }
+
     const last = this.log[this.log.length - 1];
     const priorInner = this.snapshots[this.current - 1];
-    // The inverse has to read the values that existed before the action ran.
     const prior = priorInner ? stamp(priorInner, this.current - 1) : before;
     const inverse = last ? this.adapter.inverse?.(last.action, prior) : undefined;
     if (inverse) {
@@ -194,9 +290,28 @@ export class Session {
       }
     }
 
-    const restored = this.rollback(this.current - 1);
-    if (restored.status === "accepted") restored.recovery = "snapshot";
-    return restored;
+    if (this.canRestore()) {
+      const restored = this.rollback(this.current - 1);
+      if (restored.status === "accepted") restored.recovery = "snapshot";
+      return restored;
+    }
+
+    return this.record({
+      status: "rejected",
+      action: { action: "undo", params: {} },
+      revision: this.current,
+      before,
+      after: before,
+      effects: [],
+      issues: [
+        issue(
+          "unsupported_recovery",
+          inverse
+            ? "Inverse action was rejected and snapshot restore is not available"
+            : "No inverse action, and snapshot restore is not available",
+        ),
+      ],
+    });
   }
 
   private record(result: ActionResult): ActionResult {
@@ -228,6 +343,10 @@ export class Session {
       });
     }
 
+    if (action.action === "sync") {
+      return this.sync();
+    }
+
     const before = this.snapshot();
     if (action.action === "rollback") {
       const to = action.params.revision;
@@ -247,6 +366,19 @@ export class Session {
 
     if (action.action === "undo") {
       return this.undo();
+    }
+
+    const drift = this.driftIssue(before);
+    if (drift) {
+      return this.record({
+        status: "rejected",
+        action,
+        revision: this.current,
+        before,
+        after: before,
+        effects: [],
+        issues: [drift],
+      });
     }
 
     const issues = [
@@ -296,9 +428,17 @@ export class Session {
       if (acceptedFocus) accepted.focus = acceptedFocus;
       return this.record(accepted);
     } catch (error) {
-      this.adapter.restore(cloneJson(this.snapshots[this.current]!));
+      if (this.canRestore()) {
+        this.adapter.restore(cloneJson(this.snapshots[this.current]!));
+      } else {
+        this.snapshots[this.current] = cloneJson(this.adapter.snapshot());
+      }
       const after = this.snapshot();
       const message = error instanceof Error ? error.message : "Adapter execution failed";
+      const failedIssues = [issue("execution_failed", message)];
+      if (!sameAdapterState(toAdapterState(before), toAdapterState(after))) {
+        failedIssues.push(issue("dirty_state", "Execution failed and the host still changed"));
+      }
       const failed: ActionResult = {
         status: "failed",
         action,
@@ -306,7 +446,7 @@ export class Session {
         before,
         after,
         effects: [],
-        issues: [issue("execution_failed", message)],
+        issues: failedIssues,
       };
       const failedFocus = focusFor(action, before, after);
       if (failedFocus) failed.focus = failedFocus;
@@ -317,6 +457,18 @@ export class Session {
   rollback(to: number): ActionResult {
     const action: Action = { action: "rollback", params: { revision: to } };
     const before = this.snapshot();
+
+    if (!this.canRestore()) {
+      return this.record({
+        status: "rejected",
+        action,
+        revision: this.current,
+        before,
+        after: before,
+        effects: [],
+        issues: [issue("unsupported_recovery", "Adapter does not offer snapshot restore")],
+      });
+    }
 
     if (!Number.isInteger(to) || to < 0 || to > this.current) {
       return this.record({
@@ -350,5 +502,41 @@ export class Session {
       after,
       effects: diffStates(before, after),
     });
+  }
+
+  private canRestore(): boolean {
+    return this.adapter.capabilities?.().snapshotRestore !== false;
+  }
+
+  private acknowledged(): AdapterState {
+    return this.snapshots[this.current]!;
+  }
+
+  private driftIssue(visible: State): ValidationIssue | undefined {
+    if (sameAdapterState(this.acknowledged(), toAdapterState(visible))) {
+      return undefined;
+    }
+    return issue(
+      "host_diverged",
+      "Host state changed outside this session. Call sync before applying more actions.",
+    );
+  }
+
+  private revertTo(start: number): { ok: true; recovery: RecoveryMechanism } | { ok: false } {
+    if (this.canRestore()) {
+      const restored = this.rollback(start);
+      return restored.status === "accepted" ? { ok: true, recovery: "snapshot" } : { ok: false };
+    }
+
+    const accepted = this.log.filter((entry) => entry.revision > start).reverse();
+    for (const entry of accepted) {
+      const prior = this.snapshots[entry.revision - 1];
+      if (!prior) return { ok: false };
+      const inverse = this.adapter.inverse?.(entry.action, stamp(prior, entry.revision - 1));
+      if (!inverse) return { ok: false };
+      const compensated = this.apply(inverse);
+      if (compensated.status !== "accepted") return { ok: false };
+    }
+    return { ok: true, recovery: "compensation" };
   }
 }

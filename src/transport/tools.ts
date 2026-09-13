@@ -40,6 +40,11 @@ function operationTool(prefix: string, operation: Operation): ToolDescriptor {
     properties[name] = paramSchema(spec);
     if (spec.required) required.push(name);
   }
+  properties.expectedRevision = {
+    type: "number",
+    minimum: 0,
+    description: "Session revision this action was planned against. Rejected if the session has moved on.",
+  };
 
   return {
     name: `${prefix}.${operation.name}`,
@@ -62,6 +67,11 @@ const stateTools: ToolDescriptor[] = [
       properties: { scope: { type: "string", enum: ["relevant", "full"] } },
       required: [],
     },
+  },
+  {
+    name: "scir.sync",
+    description: "Acknowledge host state that changed outside this session. Required after a host_diverged rejection.",
+    inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "scir.transaction",
@@ -114,6 +124,8 @@ export function createDispatcher(session: Session) {
         return session.describe();
       case "scir.state":
         return args.scope === "full" ? session.snapshot() : session.relevant();
+      case "scir.sync":
+        return compactResult(session.sync());
       case "scir.transaction": {
         if (!Array.isArray(args.actions)) {
           return toolError("invalid_params", "actions must be an array");
@@ -139,9 +151,10 @@ export function createDispatcher(session: Session) {
     }
 
     const operation = name.slice(prefix.length);
-    const { target, ...params } = args;
+    const { target, expectedRevision, ...params } = args;
     const action: Record<string, unknown> = { action: operation, params };
     if (typeof target === "string") action.target = target;
+    if (typeof expectedRevision === "number") action.expectedRevision = expectedRevision;
     return compactResult(session.apply(action));
   };
 }

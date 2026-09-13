@@ -74,6 +74,14 @@ describe("scir.v0 schema", () => {
     expect(validate({ id: "x", type: "rectangle", properties: {} })).toBe(true);
   });
 
+  it("accepts an action that names the revision it was planned against", () => {
+    const validate = validator("action");
+    expect(validate({ action: "set_text", target: "title_01", params: { value: "Hi" }, expectedRevision: 3 })).toBe(
+      true,
+    );
+    expect(validate({ action: "set_text", expectedRevision: 1.5 })).toBe(false);
+  });
+
   it("rejects an unknown effect kind", () => {
     const validate = validator("effect");
     expect(validate({ kind: "mutate", target: "x" })).toBe(false);

@@ -42,4 +42,17 @@ describe("action normalization and validation", () => {
     expect(result.status).toBe("rejected");
     expect(result.issues?.some((issue) => issue.code === "invalid_params")).toBe(true);
   });
+
+  it("rejects a flattened action planned against a stale revision", () => {
+    const session = new Session(new LabAdapter());
+    session.apply({ action: "set_temperature", target: "heater_01", value: 150 });
+    const result = session.apply({
+      action: "set_temperature",
+      target: "heater_01",
+      value: 180,
+      expectedRevision: 0,
+    });
+    expect(result.status).toBe("rejected");
+    expect(result.issues?.some((issue) => issue.code === "stale_revision")).toBe(true);
+  });
 });

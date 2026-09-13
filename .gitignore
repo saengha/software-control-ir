@@ -5,3 +5,6 @@ demo-dist/
 *.log
 .vite/
 coverage/
+.scir/
+.env
+.env.local

@@ -12,9 +12,17 @@
     "test:watch": "vitest",
     "example": "tsx examples/heater.ts",
     "example:slides": "tsx examples/slides.ts",
+    "example:impress": "tsx examples/impress.ts",
+    "fixture:impress": "tsx examples/write-board-odp.ts",
     "conformance": "tsx examples/conformance.ts",
     "tools": "tsx examples/tools.ts",
-    "bench": "tsx examples/bench.ts"
+    "bench": "tsx examples/bench.ts",
+    "compare": "tsx examples/compare.ts",
+    "compare:scripted": "tsx examples/compare.ts --scripted",
+    "compare:dry": "tsx examples/compare.ts --scripted --dry-run",
+    "compare:pilot": "tsx examples/compare.ts --task=contrast_check,host_drift --repeats=5 --adapter=slides",
+    "migrate:experiment": "tsx examples/migrate-experiment.ts",
+    "fixture:impress-contrast": "tsx examples/write-contrast-odp.ts"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

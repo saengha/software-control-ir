@@ -90,6 +90,14 @@ export function validateAction(
     ];
   }
 
+  if (action.expectedRevision !== undefined && action.expectedRevision !== state.revision) {
+    issues.push({
+      code: "stale_revision",
+      message: `Action expected revision ${action.expectedRevision}, session is at ${state.revision}`,
+      path: "expectedRevision",
+    });
+  }
+
   const targetSpec = operation.target;
   if (targetSpec?.required && !action.target) {
     issues.push({

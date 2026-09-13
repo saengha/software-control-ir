@@ -29,6 +29,8 @@ export interface Action {
   action: string;
   target?: ObjectId;
   params: Record<string, Json>;
+  /** Rejected when it does not match the session revision. Stops a stale agent. */
+  expectedRevision?: number;
 }
 
 export type PreconditionOp =
@@ -132,6 +134,7 @@ export interface TransactionResult {
   effects: Effect[];
   results: ActionResult[];
   rolledBack: boolean;
+  recovery?: RecoveryMechanism;
   issues?: ValidationIssue[];
 }
 
@@ -184,6 +187,7 @@ export interface StateSize {
 export interface Capabilities {
   transactions: boolean;
   compensation: boolean;
+  snapshotRestore: boolean;
   relevantState: boolean;
   hierarchy: boolean;
 }

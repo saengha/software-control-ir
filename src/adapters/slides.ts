@@ -271,7 +271,35 @@ function deckDocument(slides = 8, perSlide = 5): Seed {
   return { meta: { activeSlide: "slide_01" }, selection: ["slide_01"], objects };
 }
 
-export type SlidesPreset = "default" | "blank" | "deck";
+function contrastDocument(): Seed {
+  return {
+    meta: { activeSlide: "slide_01" },
+    selection: ["slide_01"],
+    objects: [
+      slide("slide_01", "Contrast"),
+      shape("bg_01", "rectangle", "slide_01", {
+        x: 0,
+        y: 0,
+        width: 960,
+        height: 540,
+        fill: "#f4f7fb",
+        z: 0,
+      }),
+      shape("title_01", "textbox", "slide_01", {
+        x: 80,
+        y: 70,
+        width: 800,
+        height: 90,
+        text: "Sample heading",
+        fill: "none",
+        textColor: "#ffffff",
+        z: 1,
+      }),
+    ],
+  };
+}
+
+export type SlidesPreset = "default" | "blank" | "deck" | "contrast";
 
 export class SlidesAdapter implements Adapter {
   readonly id = "slides";
@@ -286,7 +314,9 @@ export class SlidesAdapter implements Adapter {
         ? blankDocument()
         : options?.preset === "deck"
           ? deckDocument()
-          : defaultDocument();
+          : options?.preset === "contrast"
+            ? contrastDocument()
+            : defaultDocument();
     this.objects = cloneJson(seed.objects);
     this.selection = cloneJson(seed.selection);
     this.meta = cloneJson(seed.meta);

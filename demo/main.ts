@@ -233,48 +233,51 @@ function composeAction(): Record<string, unknown> {
   const target = targetEl.value || selectedId();
   const selected = session.snapshot().objects.find((item) => item.id === target);
   const box = selected ? boxOf(selected) : { x: 80, y: 80, width: 160, height: 90 };
-  switch (name) {
-    case "set_temperature":
-      return { action: name, target, value: Number(paramEl.value) || 150 };
-    case "set_level":
-      return { action: name, target, value: Number(paramEl.value) || 50 };
-    case "set_locked":
-      return { action: name, target, value: paramEl.value === "true" };
-    case "set_fill":
-      return { action: name, target, value: paramEl.value || "#4e7f74" };
-    case "set_text":
-      return { action: name, target, value: paramEl.value || "Text" };
-    case "move":
-      return { action: name, target, x: box.x, y: box.y };
-    case "resize":
-      return { action: name, target, width: box.width, height: box.height };
-    case "align":
-      return { action: name, target, edge: paramEl.value || "center" };
-    case "create_shape":
-      return {
-        action: name,
-        kind: paramEl.value || "rectangle",
-        x: 120,
-        y: 260,
-        width: 180,
-        height: 90,
-      };
-    case "create":
-      return { action: name, id: paramEl.value || "heater_03", type: "heater", x: 240, y: 310 };
-    case "group":
-      return { action: name, ids: groupIds() };
-    case "undo":
-      return { action: name };
-    case "select":
-    case "set_active_slide":
-    case "delete":
-    case "duplicate":
-    case "bring_to_front":
-    case "send_to_back":
-      return target ? { action: name, target } : { action: name };
-    default:
-      return { action: name, target };
-  }
+  const bare: Record<string, unknown> = (() => {
+    switch (name) {
+      case "set_temperature":
+        return { action: name, target, value: Number(paramEl.value) || 150 };
+      case "set_level":
+        return { action: name, target, value: Number(paramEl.value) || 50 };
+      case "set_locked":
+        return { action: name, target, value: paramEl.value === "true" };
+      case "set_fill":
+        return { action: name, target, value: paramEl.value || "#4e7f74" };
+      case "set_text":
+        return { action: name, target, value: paramEl.value || "Text" };
+      case "move":
+        return { action: name, target, x: box.x, y: box.y };
+      case "resize":
+        return { action: name, target, width: box.width, height: box.height };
+      case "align":
+        return { action: name, target, edge: paramEl.value || "center" };
+      case "create_shape":
+        return {
+          action: name,
+          kind: paramEl.value || "rectangle",
+          x: 120,
+          y: 260,
+          width: 180,
+          height: 90,
+        };
+      case "create":
+        return { action: name, id: paramEl.value || "heater_03", type: "heater", x: 240, y: 310 };
+      case "group":
+        return { action: name, ids: groupIds() };
+      case "undo":
+        return { action: name };
+      case "select":
+      case "set_active_slide":
+      case "delete":
+      case "duplicate":
+      case "bring_to_front":
+      case "send_to_back":
+        return target ? { action: name, target } : { action: name };
+      default:
+        return { action: name, target };
+    }
+  })();
+  return { ...bare, expectedRevision: session.snapshot().revision };
 }
 
 function syncComposer() {

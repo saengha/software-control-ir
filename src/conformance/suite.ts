@@ -91,8 +91,9 @@ function describeChecks(adapter: Adapter): ConformanceCheck[] {
       ok:
         description.adapter.length > 0 &&
         description.objectTypes.length > 0 &&
-        description.operations.core.length > 0,
-      detail: `${description.objectTypes.length} types, ${description.operations.domain.length} domain ops`,
+        description.operations.core.length > 0 &&
+        typeof description.capabilities.snapshotRestore === "boolean",
+      detail: `${description.objectTypes.length} types, ${description.operations.domain.length} domain ops, snapshotRestore=${description.capabilities.snapshotRestore}`,
     },
   ];
 }

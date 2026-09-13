@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-control-ir.local/schema/experiment.v1.json",
+  "title": "SCIR compare experiment log v1",
+  "deprecated": true,
+  "description": "Deprecated. Use schema/experiment.v2.json. v1 has taskCategory but no runIndex/driver.",
+  "$defs": {
+    "taskCategory": {
+      "enum": ["execution", "gated", "vision-favorable"]
+    },
+    "goalCheck": {
+      "type": "object",
+      "required": ["id", "ok", "detail"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "ok": { "type": "boolean" },
+        "detail": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "compactResult": {
+      "type": "object",
+      "required": ["status", "revision", "effects"],
+      "properties": {
+        "status": { "enum": ["accepted", "rejected", "failed"] },
+        "revision": { "type": "integer", "minimum": 0 },
+        "effects": { "type": "array" },
+        "issues": { "type": "array" },
+        "recovery": { "enum": ["compensation", "snapshot"] },
+        "focus": { "type": "object" },
+        "rolledBack": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "required": ["kind", "chars", "approxTokens"],
+      "properties": {
+        "kind": { "enum": ["structured", "vision"] },
+        "chars": { "type": "integer", "minimum": 0 },
+        "approxTokens": { "type": "integer", "minimum": 0 },
+        "objectCount": { "type": "integer", "minimum": 0 },
+        "regionCount": { "type": "integer", "minimum": 0 },
+        "rasterSha256": { "type": "string", "minLength": 64, "maxLength": 64 },
+        "rasterWidth": { "type": "integer", "minimum": 1 },
+        "rasterHeight": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "required": ["i", "proposed", "action", "result", "latencyMs", "observationChars", "observationTokens"],
+      "properties": {
+        "i": { "type": "integer", "minimum": 0 },
+        "proposed": true,
+        "action": true,
+        "result": { "$ref": "#/$defs/compactResult" },
+        "latencyMs": { "type": "number", "minimum": 0 },
+        "observationChars": { "type": "integer", "minimum": 0 },
+        "observationTokens": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "attempts",
+        "accepted",
+        "rejected",
+        "failed",
+        "revisions",
+        "steps",
+        "latencyMs",
+        "goal",
+        "observationChars",
+        "observationTokens",
+        "hostDiverged",
+        "usedSync",
+        "usedRecovery",
+        "verdict"
+      ],
+      "properties": {
+        "attempts": { "type": "integer", "minimum": 0 },
+        "accepted": { "type": "integer", "minimum": 0 },
+        "rejected": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "revisions": { "type": "integer", "minimum": 0 },
+        "steps": { "type": "integer", "minimum": 0 },
+        "latencyMs": { "type": "number", "minimum": 0 },
+        "goal": { "type": "boolean" },
+        "observationChars": { "type": "integer", "minimum": 0 },
+        "observationTokens": { "type": "integer", "minimum": 0 },
+        "hostDiverged": { "type": "integer", "minimum": 0 },
+        "usedSync": { "type": "boolean" },
+        "usedRecovery": { "type": "boolean" },
+        "verdict": { "enum": ["DONE", "FAILED"] }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "protocol",
+        "protocolVersion",
+        "adapter",
+        "task",
+        "taskCategory",
+        "policy",
+        "goalText",
+        "prompt",
+        "maxSteps",
+        "startedAt",
+        "finishedAt",
+        "observation",
+        "steps",
+        "metrics",
+        "checks"
+      ],
+      "properties": {
+        "protocol": { "const": "scir-compare-v0" },
+        "protocolVersion": { "const": 2 },
+        "adapter": { "type": "string", "minLength": 1 },
+        "task": {
+          "enum": [
+            "rename_title",
+            "recolor_accent",
+            "recolor_locked_logo",
+            "add_callout",
+            "edit_hidden_slide",
+            "recover_title",
+            "abort_rebrand",
+            "host_drift",
+            "contrast_check"
+          ]
+        },
+        "taskCategory": { "$ref": "#/$defs/taskCategory" },
+        "policy": { "enum": ["structured", "vision"] },
+        "goalText": { "type": "string", "minLength": 1 },
+        "prompt": { "type": "string", "minLength": 1 },
+        "maxSteps": { "type": "integer", "minimum": 1 },
+        "startedAt": { "type": "string", "minLength": 1 },
+        "finishedAt": { "type": "string", "minLength": 1 },
+        "observation": { "$ref": "#/$defs/observation" },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
+        "metrics": { "$ref": "#/$defs/metrics" },
+        "checks": { "type": "array", "items": { "$ref": "#/$defs/goalCheck" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}

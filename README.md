@@ -280,10 +280,12 @@ compensation
 
 snapshot
     → restore a recorded state, history moves back
-      used when the adapter cannot express an inverse
+      used when the adapter can overwrite the host document
 ```
 
-Compensation is the one that could survive contact with real software, where the IR does not own the document and cannot simply overwrite it. Snapshot restore is the fallback. Asking an adapter to declare which one it can offer is more honest than assuming undo works.
+Compensation is the one that could survive contact with real software, where the IR does not own the document and cannot simply overwrite it. Snapshot restore is advertised only when the adapter says it can. An in-memory adapter can offer both. A host-owned wrapper around the same lab scene refuses rollback, undoes with inverse actions, and says `dirty_state` when a batch prefix cannot be inverted.
+
+A host can also change out of band. The session then rejects further actions with `host_diverged` until `sync` acknowledges the new state. An action may include `expectedRevision` so a stale agent is rejected instead of overwriting a newer document.
 
 A batch either lands completely or leaves no changes behind:
 
@@ -396,6 +398,7 @@ To check that this is actually true rather than assumed, an adapter catalog can 
 ```
 slides.create_shape   required: kind, x, y, width, height
 slides.group          required: ids
+scir.sync             required: -
 scir.transaction      required: actions
 scir.undo             required: -
 ```
@@ -469,7 +472,7 @@ The shared checks currently ask whether an adapter:
 8. Leaves no changes behind when a batch aborts
 9. Undoes the newest revision and says which mechanism it used
 
-Both adapters pass all of them, and they do not pass them the same way: slides falls back to a snapshot restore where lab can compensate with an inverse action. That difference is the point of running the same checks against both.
+Lab, slides, and Impress (when LibreOffice is installed) pass the same checks. They do not pass them the same way: slides can fall back to a snapshot restore where lab can compensate with an inverse action, and Impress can do both — compensation for undo, IR-to-UNO rewrite for rollback. That difference is the point of running the same checks against each adapter.
 
 This is currently a proposed direction, not an established specification.
 
@@ -483,28 +486,117 @@ I don't know the answer yet. That's the reason for building this project.
 
 ## First experiment
 
-The first goal is not to support many applications. It is to build one reasonably complete adapter and see whether the idea actually helps.
+The first measurement is not “many applications.” It is one fixed protocol against a software-shaped adapter and, when LibreOffice is installed, against a live `.odp`.
 
-A first experiment could compare:
+The protocol is `scir-compare-v0` (prompt set **v3**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default `claude-sonnet-4-5`). They do not get the same tools:
 
 ```
-Vision / UI-based Agent
+Screenshots + click / type / scroll / right_click
         vs.
-Structured State + Software Control IR
+Structured catalog (as-is) + undo + sync
 ```
 
-Possible measurements:
+Each structured call returns the resulting state and any validation error. The vision agent has no object IDs, lock flags, or hidden-slide flags — only the rendered image and what a visible UI panel would show. Both say `DONE` or `FAILED`.
 
-- Task success rate
-- Token usage
-- Number of tool calls
-- Invalid actions
-- Execution latency
-- State errors
-- Recovery after failure
-- Rollback success
+There are two drivers:
 
-The purpose of the experiment is not to prove that IR is better. It is to find out where it helps, where it doesn't, and what the model needs to change.
+- **`scripted`** — frozen action lists. Deterministic baseline. No API key.
+- **`live`** — Anthropic Messages, real tool loop, PNG screenshots for vision. Needs `ANTHROPIC_API_KEY` or `SCIR_ANTHROPIC_API_KEY`.
+
+Nine goals, in three categories (see `docs/tasks.md`):
+
+| Category | Tasks | What it is for |
+| --- | --- | --- |
+| **execution** | `rename_title`, `recolor_accent`, `add_callout` | Visible edits a screenshot agent can attempt |
+| **gated** | `recolor_locked_logo`, `edit_hidden_slide`, `recover_title`, `abort_rebrand`, `host_drift` | Lock, hidden slide, recovery, atomic batch, host interference — structured has a channel vision does not |
+| **vision-favorable** | `contrast_check` | Graded from the rendered raster, not from IR `set_fill` success |
+
+Do not treat the overall win rate as the result. Gated tasks are structurally easier for the structured policy. The report prints that warning next to the combined table.
+
+`host_drift` is not a mock flag. After `HOST_DRIFT_AFTER_STEPS` (default 3) tool calls, the harness mutates **`title_01` text** to `"Out of band"` behind the session. The goal is only `Set the title to "Recovered".` Structured must `sync` before it can finish the edit. Vision has no `sync` tool.
+
+`contrast_check` uses a separate fixture (`fixtures/impress/contrast.odp` / slides `contrast` preset): white text on a light background. The structured script’s fill can succeed in IR and still fail the raster grader (WCAG AA 4.5:1). That is the point of the task.
+
+## Progress
+
+**Last updated: 2026-09-13.** Experimental / early stage. Not a standard.
+
+This is a working log of what exists, what has been measured, what was found and fixed, and what is still unrun. The question in “The main question” has not been answered yet. These notes are so the next run does not re-learn the same protocol bugs at 90-run cost.
+
+### Runtime and IR
+
+Implemented and tested:
+
+- Minimal IR: state, action, validation, effect, revision, rollback.
+- `Session`: validate before mutate; effects and revision on every accepted action; `expectedRevision` / `stale_revision`.
+- Common core stays small: `select`, `set_locked`, `delete`. Domain ops live on adapters.
+- Atomic batches: an abort reverts the accepted prefix, or the adapter says `dirty_state` instead of claiming atomicity.
+- Recovery names its mechanism: `compensation` (inverse action, revision moves forward) vs `snapshot` (restore recorded state). Snapshot restore is advertised only when the adapter can overwrite the host document.
+- Host-owned documents: out-of-band change → `host_diverged` → further actions refused until explicit `sync`. `hostOwned()` wraps an in-memory adapter so snapshot restore is not a fake product promise.
+- Relevant-state slices (current slide, not the whole deck). On a 48-object deck the relevant slice is 6 objects and about 13% of the tokens of the full document. That measures the representation, not an agent.
+- Catalog projected as typed tool descriptors + dispatcher. Compact tool results: an agent that already holds state does not get two more copies of it.
+- Published schema tested against real session output (`schema/scir.v0.json`).
+- Shared conformance suite: lab, slides, and Impress (when LibreOffice is installed) pass the same checks by different mechanisms.
+
+### Adapters
+
+| Adapter | What it is | Recovery | Notes |
+| --- | --- | --- | --- |
+| **lab** | `heater` / `vessel` stand-in | compensation, optional snapshot | Original fixture |
+| **slides** | In-memory PPT-like surface | compensation + snapshot | Not Microsoft PowerPoint. `resize` is a bounding box. Grouping is a domain op the common core should never learn |
+| **impress** | Live LibreOffice Impress over UNO | compensation for undo; snapshot restore by rewriting the live document from IR state | First contact with real software |
+
+Impress loads `fixtures/impress/board.odp` (and `contrast.odp` for `contrast_check`). Headless `soffice.com` gets a private `UserInstallation` and `--nolockcheck` so it does not become the desktop LibreOffice singleton (the failure mode that shows up as a bogus `bootstrap.ini` error). `close()` kills only that process tree. Coordinates are millimetres. Out-of-band UNO edits surface as `host_diverged` until `sync`. Direct `soffice.bin` is not the entry point — it exits without opening `--accept`. Set `SCIR_LIBREOFFICE` if LibreOffice is not in `C:\Program Files\LibreOffice\program`.
+
+### Compare harness
+
+Code lives in `src/bench/compare/`. CLI: `examples/compare.ts`.
+
+- Prompt set v3. Frozen prompt **text** is unchanged from v2; the version bump is for the live driver, repeats, and log fields.
+- Experiment log: `schema/experiment.v2.json` (required `taskCategory`, `driver`, `runIndex`; optional `model`, `hostDriftAfterSteps`). v0/v1 are deprecated; `npm run migrate:experiment` rewrites old logs.
+- Default repeats **N=5**. Report prints `5/5`-style rates, sample standard deviation (`s_σ` / `v_σ`), category subtables, and a `spread` mark when repeats disagree.
+- Live path: Anthropic Messages via `fetch`, retry/backoff on 429/5xx. Structured uses `toolDescriptors()` / `createDispatcher()`. Vision uses a PNG screenshot (Impress `exportPng`, or slides raster + `encodePngRgb`) and maps clicks through `src/bench/compare/ui.ts`.
+- Replay client (`createReplayClient`) drives the **same** live loop with frozen scripts so the loop is tested without spending API budget.
+- `--dry-run` forces N=1. `--scripted` uses frozen scripts. `--adapter=slides|impress|all`. `--category=`. `--task=id,id` for a subset (used by the pilot).
+- This Windows npm does **not** forward `npm run compare -- --scripted`. Use `npm run compare:scripted`, `npm run compare:dry`, `npm run compare:pilot`, or `npx tsx examples/compare.ts ...`.
+
+### Protocol bugs found before burning a 90-run
+
+These are cheap to miss in a scripted dry-run and expensive to discover after 90 live calls.
+
+**1. Vision click hit-test was leaking IR fields. Fixed.**
+
+`click(x,y)` → hit-test → UNO/IR is the right shape (a real mouse click also lands on coordinates and the app decides what was hit). The leak was in the **tool result text** sent back to the vision model: `CompactResult` went out with `effects[].target` (`logo_01`), `focus.properties.locked`, `issues[].code === "locked"`, and the right-click panel included `"locked": true`. That breaks the vision prompt’s “no lock state / no object IDs” premise and would contaminate gated tasks, especially `recolor_locked_logo`.
+
+Now the vision model only gets screenshot pixels plus visible chrome: toolbar, slide tabs, optional panel `{ fill, text }`, optional toast. The driver still knows lock state internally; experiment logs still store `step.result` for the experimenter. Tests assert that live vision `tool_result` JSON does not contain `"locked":`, seed object ids, `effects`, or `issues`. A locked edit toast is `This object cannot be edited.` — it does not name the IR field.
+
+**2. `host_drift` mutates the title, not some other field. Confirmed.**
+
+The inject is `set_text` on `title_01` to `"Out of band"`. That is the same field the goal edits. Structured will hit `host_diverged` on the next apply unless it `sync`s. A subtitle-only inject would have let structured finish without ever seeing drift.
+
+### What has been measured
+
+| Run | Adapter | Driver | Result |
+| --- | --- | --- | --- |
+| Scripted 9 tasks × 2 policies × 5 repeats (90) | slides | frozen scripts | Deterministic rates (5/5 where the script is supposed to succeed). Confirms the grader and logs, **not** a model. |
+| Live loop, all 9 × 2, replay client | slides | live loop, no API | Tests pass. The loop, PNG codec, click mapping, inject timing, and tool wiring are exercised. |
+| Impress conformance + compare (scripted) | live `.odp` | tests | LibreOffice path works when installed: private profile, UNO mutate, host drift, snapshot rewrite. |
+| Live model, `contrast_check` + `host_drift`, N=5 (pilot) | slides | Anthropic | **Not run.** No `ANTHROPIC_API_KEY` / `SCIR_ANTHROPIC_API_KEY` in the environment. |
+| Live model, full 9 × 2 × 5 (90) | slides / impress | Anthropic | **Not run.** Do the pilot first. |
+
+Scripted vision “success” is a script hitting the right pixels. It is not evidence that a vision model can do the task. Live structured vs live vision with the **same** model is the measurement that is still missing.
+
+### What to run next
+
+1. Set `ANTHROPIC_API_KEY` (or `SCIR_ANTHROPIC_API_KEY`).
+2. Pilot, slides only, N=5: `npm run compare:pilot`  
+   Why these two tasks: `contrast_check` is the scripted case where structured can fail the raster grader while vision’s darker fill passes — that is the result most worth reproducing with a real model. `host_drift` is the cheapest check that title collision actually forces `sync`.
+3. If the pilot protocol looks sane, full live 90-run (same model both policies). Optional Impress pass after slides.
+4. Do not interpret a combined win rate as the headline. Read the category tables.
+
+### Tests
+
+`npm test` is currently **111** tests (Vitest). Impress tests skip or run depending on LibreOffice + fixtures. `npm run typecheck` is clean.
 
 ## Current status
 
@@ -512,7 +604,7 @@ The purpose of the experiment is not to prove that IR is better. It is to find o
 
 This project is not presented as an established standard. The semantic model, adapter interface, and conformance approach are still being explored.
 
-The immediate priority is therefore not to define a large specification. It is to build a small working implementation and discover what survives contact with real software.
+The immediate priority is not a large specification. It is a small working implementation, contact with one real application, and a measurement that can fail.
 
 This repository currently includes:
 
@@ -520,23 +612,23 @@ This repository currently includes:
 - a `Session` runtime that validates before mutate
 - a small **common core**: `select`, `set_locked`, `delete`
 - atomic batches, and undo that reports whether it compensated or restored a snapshot
+- host-owned mode: no snapshot overwrite, drift detection, explicit sync, stale `expectedRevision`
 - a **lab** adapter (`heater` / `vessel`) as the original stand-in
-- a **slides** adapter with PPT-like domain operations: `create_shape`, `set_fill`, `set_text`, `resize`, `align`
+- a **slides** adapter with PPT-like domain operations: `create_shape`, `set_fill`, `set_text`, `resize`, `align`, plus `duplicate`, `bring_to_front`, `send_to_back`, `group`, `ungroup`
+- a **LibreOffice Impress** adapter against a live `.odp`
 - relevant-state slices that walk the object tree (current slide, not the whole deck)
-- PPT-like domain extras on slides: `duplicate`, `bring_to_front`, `send_to_back`, `group`, `ungroup`
 - adapter self-description, so an agent can read capabilities instead of probing for them
 - the catalog projected as typed tool descriptors, with a dispatcher
 - action traces that can be replayed
 - a measurement harness: structured vs naive scripts, rollback recovery, batch atomicity, and state size
-- shared conformance checks against both adapters
+- a fixed compare protocol (`scir-compare-v0` v3): nine tasks, scripted baseline **and** a live model loop, experiment logs in `schema/experiment.v2.json`
+- shared conformance checks against lab, slides, and Impress when LibreOffice is installed
 - a JSON schema that real session output is tested against
 - a local demo that places pixel space next to structured state
 
-On a 48-object deck, the relevant slice is 6 objects and about 13% of the tokens of the full document. That is a measurement of the representation, not of an agent; it says how much state an agent would be handed, not how well it would then perform.
-
 The slides adapter is still in-memory. It is a software-shaped surface, not Microsoft PowerPoint. Resize here means a bounding box, which is intentionally not Blender scale or a CAD constraint. Grouping is the clearest case so far of a domain operation the common core should never learn: it is a slide concept, it has no single inverse action, and `delete` correctly refuses a group that still has members.
 
-The next useful step is an adapter against real software.
+The Impress adapter talks to a live LibreOffice document over UNO. It loads committed fixtures instead of factory-seeding a deck. Snapshot restore rebuilds the live document from IR state. That is a declared capability, not a default for every adapter.
 
 ## Design principles
 
@@ -562,9 +654,15 @@ The next useful step is an adapter against real software.
 - [x] Measure the size of full state against the relevant slice
 - [x] Project the catalog as tool descriptors, so a transport can carry the IR
 - [x] Test the published schema against real session output
-- [ ] Build an adapter against real software
-- [ ] Benchmark against existing approaches
-- [ ] Refine the IR based on actual implementations
+- [x] Stop assuming the IR owns the document (snapshot restore is a capability, not a default)
+- [x] Build an adapter against real software (LibreOffice Impress)
+- [x] Fix a compare protocol, task set, scripted vision baseline, and experiment log schema
+- [x] Build a live model loop (same model for structured and vision; PNG screenshots; N repeats)
+- [x] Stop vision tool results from leaking IR lock fields and object ids
+- [ ] Run the live pilot (`contrast_check` + `host_drift`, N=5) against a real model
+- [ ] Run the full live 90-run (9 tasks × 2 policies × 5) and read category tables, not the combined rate
+- [ ] Optional: same live protocol against Impress
+- [ ] Refine the IR based on those measurements, not on the scripted baseline
 
 ## What this is not
 
@@ -590,13 +688,35 @@ npm run example
 npm run example:slides
 npm run conformance
 npm run tools
+npm run example:impress
 npm run bench
+npm run compare:scripted
+npm run compare:dry
+npm run compare:pilot
 npm run dev
 ```
 
-`npm run bench` runs scripted policies against the slides adapter. It does not yet compare IR to a vision model. It measures invalid actions, goal checks, rollback, batch atomicity, and state size on known tasks.
+`npm run example:impress` starts a headless LibreOffice, opens `fixtures/impress/board.odp`, and runs `set_text` against the live document. Set `SCIR_LIBREOFFICE` if LibreOffice is not in `C:\Program Files\LibreOffice\program`. On Windows the launcher is `soffice.com` with a private `UserInstallation`; `close()` kills only that process tree. Direct `soffice.bin` is not the entry point — it exits without opening `--accept`. `npm run fixture:impress` / `npm run fixture:impress-contrast` rewrite the committed decks from the factory seed; that seed path is not how the adapter runs.
 
-`npm run conformance` prints the shared checks for both adapters, including which recovery mechanism each one used.
+### Compare
+
+Default `npm run compare` is the **live** driver and exits if there is no API key. Use the named scripts on Windows; `npm run compare -- --scripted` is not forwarded by this npm.
+
+| Command | What it does |
+| --- | --- |
+| `npm run compare:scripted` | Frozen scripts, N=5, slides + Impress if present |
+| `npm run compare:dry` | Scripted, N=1 |
+| `npm run compare:pilot` | **Live** `contrast_check` + `host_drift`, N=5, slides only. Needs an API key |
+| `npx tsx examples/compare.ts --scripted --adapter=slides --repeats=5` | Scripted slides 90-run |
+| `npx tsx examples/compare.ts --task=contrast_check --repeats=5 --adapter=slides` | Live one-task subset |
+
+Environment: `ANTHROPIC_API_KEY` or `SCIR_ANTHROPIC_API_KEY`; optional `SCIR_COMPARE_MODEL` (default `claude-sonnet-4-5`), `SCIR_COMPARE_REPEATS`, `SCIR_COMPARE_ADAPTER`, `SCIR_COMPARE_DRIVER`, `SCIR_COMPARE_TASKS`, `SCIR_COMPARE_DRY_RUN=1`.
+
+Both live policies must share the same model. Splitting models would measure Claude vs GPT, not structured IR vs screenshots.
+
+Task catalog: `docs/tasks.md`. Log schema: `schema/experiment.v2.json`.
+
+`npm run conformance` prints the shared checks for lab, slides, and Impress when LibreOffice and the `.odp` fixture are present, including which recovery mechanism each one used.
 
 `npm run tools` prints the catalog as tool descriptors and runs a few calls through the dispatcher.
 

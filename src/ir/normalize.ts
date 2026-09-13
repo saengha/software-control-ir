@@ -39,7 +39,7 @@ export function normalizeAction(raw: unknown): Action {
     params = cloneJson(raw.params) as Record<string, Json>;
   } else {
     for (const [key, value] of Object.entries(raw)) {
-      if (key === "action" || key === "target" || key === "params") continue;
+      if (key === "action" || key === "target" || key === "params" || key === "expectedRevision") continue;
       params[key] = asJson(value);
     }
   }
@@ -51,5 +51,17 @@ export function normalizeAction(raw: unknown): Action {
   if (typeof target === "string") {
     action.target = target;
   }
+  if (raw.expectedRevision !== undefined) {
+    if (typeof raw.expectedRevision !== "number" || !Number.isInteger(raw.expectedRevision)) {
+      throw Object.assign(new Error("expectedRevision must be an integer when present"), {
+        code: "malformed_action",
+      });
+    }
+    action.expectedRevision = raw.expectedRevision;
+  }
   return action;
+}
+
+export function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
