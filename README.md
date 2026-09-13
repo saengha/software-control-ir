@@ -488,7 +488,7 @@ I don't know the answer yet. That's the reason for building this project.
 
 The first measurement is not “many applications.” It is one fixed protocol against a software-shaped adapter and, when LibreOffice is installed, against a live `.odp`.
 
-The protocol is `scir-compare-v0` (prompt set **v3**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default `claude-sonnet-4-5`). They do not get the same tools:
+The protocol is `scir-compare-v0` (prompt set **v3**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). They do not get the same tools:
 
 ```
 Screenshots + click / type / scroll / right_click
@@ -501,7 +501,7 @@ Each structured call returns the resulting state and any validation error. The v
 There are two drivers:
 
 - **`scripted`** — frozen action lists. Deterministic baseline. No API key.
-- **`live`** — Anthropic Messages, real tool loop, PNG screenshots for vision. Needs `ANTHROPIC_API_KEY` or `SCIR_ANTHROPIC_API_KEY`.
+- **`live`** — real tool loop, PNG screenshots for vision. Gemini (`GEMINI_API_KEY`) or Anthropic (`ANTHROPIC_API_KEY`). Copy `.env.example` to `.env`.
 
 Nine goals, in three categories (see `docs/tasks.md`):
 
@@ -555,7 +555,7 @@ Code lives in `src/bench/compare/`. CLI: `examples/compare.ts`.
 - Prompt set v3. Frozen prompt **text** is unchanged from v2; the version bump is for the live driver, repeats, and log fields.
 - Experiment log: `schema/experiment.v2.json` (required `taskCategory`, `driver`, `runIndex`; optional `model`, `hostDriftAfterSteps`). v0/v1 are deprecated; `npm run migrate:experiment` rewrites old logs.
 - Default repeats **N=5**. Report prints `5/5`-style rates, sample standard deviation (`s_σ` / `v_σ`), category subtables, and a `spread` mark when repeats disagree.
-- Live path: Anthropic Messages via `fetch`, retry/backoff on 429/5xx. Structured uses `toolDescriptors()` / `createDispatcher()`. Vision uses a PNG screenshot (Impress `exportPng`, or slides raster + `encodePngRgb`) and maps clicks through `src/bench/compare/ui.ts`.
+- Live path: Gemini (`GEMINI_API_KEY`, default `gemini-3.6-flash`) or Anthropic. Structured uses `toolDescriptors()` / `createDispatcher()`. Vision uses a PNG screenshot and maps clicks through `src/bench/compare/ui.ts`. Thinking is set to minimal on Gemini 3 so output tokens stay cheap.
 - Replay client (`createReplayClient`) drives the **same** live loop with frozen scripts so the loop is tested without spending API budget.
 - `--dry-run` forces N=1. `--scripted` uses frozen scripts. `--adapter=slides|impress|all`. `--category=`. `--task=id,id` for a subset (used by the pilot).
 - This Windows npm does **not** forward `npm run compare -- --scripted`. Use `npm run compare:scripted`, `npm run compare:dry`, `npm run compare:pilot`, or `npx tsx examples/compare.ts ...`.
@@ -572,7 +572,11 @@ Now the vision model only gets screenshot pixels plus visible chrome: toolbar, s
 
 **2. `host_drift` mutates the title, not some other field. Confirmed.**
 
-The inject is `set_text` on `title_01` to `"Out of band"`. That is the same field the goal edits. Structured will hit `host_diverged` on the next apply unless it `sync`s. A subtitle-only inject would have let structured finish without ever seeing drift.
+The inject is `set_text` on `title_01` to `"Out of band"`. That is the same field the goal edits. Structured will hit `host_diverged` on the next apply unless it `sync`s — **if it is still running when the inject fires**.
+
+**3. Live structured can finish `host_drift` before the inject. Seen in the pilot.**
+
+`HOST_DRIFT_AFTER_STEPS` is 3. `gemini-3.6-flash` renamed the title in one `set_text` (5/5, `usedSync=false`, `hostDiverged=0`). The 5/5 is not a recovery measurement. Vision did hit drift and went 0/5, title stuck on `"Out of band"`. Fix inject timing before a 90-run if structured is supposed to meet `host_diverged`.
 
 ### What has been measured
 
@@ -581,18 +585,16 @@ The inject is `set_text` on `title_01` to `"Out of band"`. That is the same fiel
 | Scripted 9 tasks × 2 policies × 5 repeats (90) | slides | frozen scripts | Deterministic rates (5/5 where the script is supposed to succeed). Confirms the grader and logs, **not** a model. |
 | Live loop, all 9 × 2, replay client | slides | live loop, no API | Tests pass. The loop, PNG codec, click mapping, inject timing, and tool wiring are exercised. |
 | Impress conformance + compare (scripted) | live `.odp` | tests | LibreOffice path works when installed: private profile, UNO mutate, host drift, snapshot rewrite. |
-| Live model, `contrast_check` + `host_drift`, N=5 (pilot) | slides | Anthropic | **Not run.** No `ANTHROPIC_API_KEY` / `SCIR_ANTHROPIC_API_KEY` in the environment. |
-| Live model, full 9 × 2 × 5 (90) | slides / impress | Anthropic | **Not run.** Do the pilot first. |
+| Live model, `contrast_check` + `host_drift`, N=5 (pilot) | slides | `gemini-3.6-flash` | **Done.** [results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md](results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md). `contrast_check` 5/5 vs 5/5 (scripted split did not reproduce). `host_drift` 5/5 vs 0/5, but structured never saw drift. |
+| Live model, full 9 × 2 × 5 (90) | slides / impress | same model both policies | **Not run.** Fix `host_drift` inject timing first. |
 
-Scripted vision “success” is a script hitting the right pixels. It is not evidence that a vision model can do the task. Live structured vs live vision with the **same** model is the measurement that is still missing.
+Scripted vision “success” is a script hitting the right pixels. It is not evidence that a vision model can do the task. The live pilot is the first same-model measurement; the 90-run is still missing.
 
 ### What to run next
 
-1. Set `ANTHROPIC_API_KEY` (or `SCIR_ANTHROPIC_API_KEY`).
-2. Pilot, slides only, N=5: `npm run compare:pilot`  
-   Why these two tasks: `contrast_check` is the scripted case where structured can fail the raster grader while vision’s darker fill passes — that is the result most worth reproducing with a real model. `host_drift` is the cheapest check that title collision actually forces `sync`.
-3. If the pilot protocol looks sane, full live 90-run (same model both policies). Optional Impress pass after slides.
-4. Do not interpret a combined win rate as the headline. Read the category tables.
+1. Decide `host_drift` inject timing so a one-step structured edit still meets `host_diverged`.
+2. Do **not** burn the 90-run until that is fixed. The pilot already showed the scripted `contrast_check` split does not hold for `gemini-3.6-flash`.
+3. Do not interpret a combined win rate as the headline. Read the category tables.
 
 ### Tests
 
@@ -659,7 +661,8 @@ The Impress adapter talks to a live LibreOffice document over UNO. It loads comm
 - [x] Fix a compare protocol, task set, scripted vision baseline, and experiment log schema
 - [x] Build a live model loop (same model for structured and vision; PNG screenshots; N repeats)
 - [x] Stop vision tool results from leaking IR lock fields and object ids
-- [ ] Run the live pilot (`contrast_check` + `host_drift`, N=5) against a real model
+- [x] Run the live pilot (`contrast_check` + `host_drift`, N=5) against `gemini-3.6-flash`
+- [ ] Fix live `host_drift` inject timing so structured actually meets `host_diverged`
 - [ ] Run the full live 90-run (9 tasks × 2 policies × 5) and read category tables, not the combined rate
 - [ ] Optional: same live protocol against Impress
 - [ ] Refine the IR based on those measurements, not on the scripted baseline
@@ -710,7 +713,7 @@ Default `npm run compare` is the **live** driver and exits if there is no API ke
 | `npx tsx examples/compare.ts --scripted --adapter=slides --repeats=5` | Scripted slides 90-run |
 | `npx tsx examples/compare.ts --task=contrast_check --repeats=5 --adapter=slides` | Live one-task subset |
 
-Environment: `ANTHROPIC_API_KEY` or `SCIR_ANTHROPIC_API_KEY`; optional `SCIR_COMPARE_MODEL` (default `claude-sonnet-4-5`), `SCIR_COMPARE_REPEATS`, `SCIR_COMPARE_ADAPTER`, `SCIR_COMPARE_DRIVER`, `SCIR_COMPARE_TASKS`, `SCIR_COMPARE_DRY_RUN=1`.
+Environment: `GEMINI_API_KEY` or `ANTHROPIC_API_KEY`; `SCIR_COMPARE_MODEL` (`.env` default `gemini-3.6-flash`), `SCIR_COMPARE_PROVIDER`, `SCIR_COMPARE_REPEATS`, `SCIR_COMPARE_ADAPTER`, `SCIR_COMPARE_DRIVER`, `SCIR_COMPARE_TASKS`, `SCIR_COMPARE_DRY_RUN=1`.
 
 Both live policies must share the same model. Splitting models would measure Claude vs GPT, not structured IR vs screenshots.
 

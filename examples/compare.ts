@@ -1,10 +1,13 @@
-import { existsSync } from "node:fs";
+import "./load-env.js";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   COMPARE_LIVE_MODEL,
   COMPARE_PROTOCOL,
   ImpressAdapter,
   copyImpressDocument,
-  createAnthropicClient,
+  createLiveClient,
   defaultImpressContrastDocument,
   defaultImpressDocument,
   formatCompareTable,
@@ -18,6 +21,7 @@ import {
 } from "../src/index.js";
 
 const args = parseCompareArgs(process.argv);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function suiteFilter() {
   return {
@@ -27,12 +31,42 @@ function suiteFilter() {
   };
 }
 
+function writeResults(title: string, logs: CompareRunLog[]) {
+  const dir = path.join(root, "results");
+  mkdirSync(dir, { recursive: true });
+  const day = new Date().toISOString().slice(0, 10);
+  const model = args.driver === "live" ? COMPARE_LIVE_MODEL.replace(/[^\w.-]+/g, "_") : "scripted";
+  const tasks = args.tasks?.join("+") ?? args.category ?? "all";
+  const stem = `${day}-${title}-${model}-n${args.repeats}-${tasks}`;
+  const table = formatCompareTable(logs, args.category ? { category: args.category } : undefined);
+  const header = [
+    `# Compare ${title}`,
+    "",
+    `- protocol: ${COMPARE_PROTOCOL.id} v${COMPARE_PROTOCOL.version}`,
+    `- driver: ${args.driver}`,
+    `- model: ${args.driver === "live" ? COMPARE_LIVE_MODEL : "scripted"}`,
+    `- adapter: ${title}`,
+    `- repeats: ${args.repeats}`,
+    `- tasks: ${args.tasks?.join(", ") ?? args.category ?? "all"}`,
+    `- when: ${new Date().toISOString()}`,
+    "",
+    "```",
+    table,
+    "```",
+    "",
+  ].join("\n");
+  writeFileSync(path.join(dir, `${stem}.md`), header);
+  writeFileSync(path.join(dir, `${stem}.json`), JSON.stringify(logs, null, 2));
+  writeFileSync(path.join(dir, "latest.md"), header);
+}
+
 function print(title: string, logs: CompareRunLog[]) {
   const modelLine = args.driver === "live" ? `  model=${COMPARE_LIVE_MODEL}` : "  driver=scripted";
   const taskLine = args.tasks ? `  tasks=${args.tasks.join(",")}` : args.category ? `  category=${args.category}` : "";
   console.log(`=== ${title}  ${COMPARE_PROTOCOL.id} v${COMPARE_PROTOCOL.version}${modelLine} repeats=${args.repeats}${taskLine} ===`);
   console.log(formatCompareTable(logs, args.category ? { category: args.category } : undefined));
   console.log();
+  writeResults(title, logs);
 }
 
 function impressBundle() {
@@ -61,9 +95,9 @@ function impressBundle() {
 
 async function main() {
   if (args.driver === "live" && !liveApiKey()) {
-    console.error("Live compare needs ANTHROPIC_API_KEY (or SCIR_ANTHROPIC_API_KEY).");
+    console.error("Live compare needs GEMINI_API_KEY (or ANTHROPIC_API_KEY).");
     console.error(`Both structured and vision use the same model: ${COMPARE_LIVE_MODEL}`);
-    console.error("Pass --scripted for the frozen-script baseline, or set a key and use --dry-run first.");
+    console.error("Copy .env.example to .env and fill the key, or pass --scripted.");
     process.exit(2);
   }
 
@@ -73,7 +107,7 @@ async function main() {
 
   if (args.adapter !== "impress") {
     if (args.driver === "live") {
-      const client = createAnthropicClient(liveApiKey()!, COMPARE_LIVE_MODEL);
+      const client = createLiveClient(liveApiKey()!, COMPARE_LIVE_MODEL);
       print(
         "slides",
         await runSlidesCompareLive(client, suiteFilter()),
@@ -96,7 +130,7 @@ async function main() {
   const { adapter, options } = impressBundle();
   try {
     if (args.driver === "live") {
-      const client = createAnthropicClient(liveApiKey()!, COMPARE_LIVE_MODEL);
+      const client = createLiveClient(liveApiKey()!, COMPARE_LIVE_MODEL);
       print("impress", await runCompareSuiteLive(adapter, client, options));
     } else {
       print("impress", runCompareSuite(adapter, options));

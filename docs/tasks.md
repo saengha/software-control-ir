@@ -1,8 +1,10 @@
 # Compare tasks
 
-Fixed goals for `scir-compare-v0` (prompt set v3, experiment log `schema/experiment.v2.json`). Both policies get the same `goalText`, the same step budget, and — when live — the **same model** (`SCIR_COMPARE_MODEL`, default `claude-sonnet-4-5`). Frozen scripts remain available via `npm run compare:scripted`.
+Fixed goals for `scir-compare-v0` (prompt set v3, experiment log `schema/experiment.v2.json`). Both policies get the same `goalText`, the same step budget, and — when live — the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). Frozen scripts remain available via `npm run compare:scripted`.
 
-Live: `ANTHROPIC_API_KEY` (or `SCIR_ANTHROPIC_API_KEY`). Each tool call is one step.
+Live: `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`). Each tool call is one step. Default live model in `.env` is `gemini-3.6-flash`; structured and vision must share it. `gemini-2.5-flash` is closed to new keys.
+
+A live model can finish `host_drift` in one `set_text` before `HOST_DRIFT_AFTER_STEPS`. The structured 5/5 in the 2026-09-13 pilot is not a drift-recovery result. See `results/`.
 
 Recommended order before a full `9 × 2 × 5` run:
 

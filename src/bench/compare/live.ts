@@ -115,12 +115,16 @@ export async function runCompareLive(
 
     const assistantContent = [
       ...(reply.text ? [{ type: "text" as const, text: reply.text }] : []),
-      ...reply.toolCalls.map((call) => ({
-        type: "tool_use" as const,
-        id: call.id,
-        name: call.name,
-        input: call.input,
-      })),
+      ...reply.toolCalls.map((call) => {
+        const block: { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; thoughtSignature?: string } = {
+          type: "tool_use",
+          id: call.id,
+          name: call.name,
+          input: call.input,
+        };
+        if (call.thoughtSignature) block.thoughtSignature = call.thoughtSignature;
+        return block;
+      }),
     ];
     messages.push({ role: "assistant", content: assistantContent });
 

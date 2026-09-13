@@ -6,12 +6,15 @@ import {
   SlidesAdapter,
   createReplayClient,
   formatCompareTable,
+  fromGeminiToolName,
+  geminiToolName,
   observeVision,
   parseCompareArgs,
   repeatStats,
   runCompareLive,
   runSlidesCompare,
   sampleStdev,
+  toGeminiContents,
   visionToolFeedback,
   withBackoff,
 } from "../src/index.js";
@@ -61,6 +64,54 @@ describe("compare repeats and aggregation", () => {
     const logs = runSlidesCompare({ tasks: ["contrast_check", "host_drift"], repeats: 1 });
     expect(new Set(logs.map((log) => log.task))).toEqual(new Set(["contrast_check", "host_drift"]));
     expect(logs).toHaveLength(4);
+  });
+});
+
+describe("gemini live mapping", () => {
+  it("rewrites dotted catalog names into Gemini function names", () => {
+    expect(geminiToolName("slides.set_text")).toBe("slides__set_text");
+    expect(fromGeminiToolName("slides__set_text")).toBe("slides.set_text");
+    expect(fromGeminiToolName("screenshot")).toBe("screenshot");
+  });
+
+  it("sends screenshots as inline image parts, not IR ids", () => {
+    const contents = toGeminiContents([
+      { role: "user", content: 'Goal: Set the title to "Recovered".' },
+      {
+        role: "assistant",
+        content: [{ type: "tool_use", id: "t1", name: "screenshot", input: {} }],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "t1",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "aaaa" } },
+              { type: "text", text: JSON.stringify({ width: 640, height: 400, chrome: { toolbar: [] } }) },
+            ],
+          },
+        ],
+      },
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "t2",
+            name: "slides.set_text",
+            input: { target: "title_01", value: "Recovered" },
+          },
+        ],
+      },
+    ]);
+    expect(contents[1]?.role).toBe("model");
+    expect(contents[1]?.parts[0]?.functionCall?.name).toBe("screenshot");
+    expect(contents[2]?.parts.some((part) => part.inlineData?.mimeType === "image/png")).toBe(true);
+    expect(contents[2]?.parts.some((part) => part.functionResponse?.name === "screenshot")).toBe(true);
+    expect(JSON.stringify(contents[2])).not.toContain("logo_01");
+    expect(contents[3]?.parts[0]?.functionCall?.name).toBe("slides__set_text");
   });
 });
 

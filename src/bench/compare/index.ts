@@ -28,6 +28,7 @@ export {
   COMPARE_LIVE_MODEL,
   COMPARE_REPEATS,
   HOST_DRIFT_AFTER_STEPS,
+  compareProvider,
   liveApiKey,
 } from "./settings.js";
 export { LOCKED_TARGET_POLICY, TASK_CATEGORIES, TASK_CATEGORY, categoryOf, lockedTargetFillAccepted } from "./policy.js";
@@ -40,7 +41,12 @@ export {
 } from "./contrast.js";
 export {
   createAnthropicClient,
+  createGeminiClient,
+  createLiveClient,
   createReplayClient,
+  fromGeminiToolName,
+  geminiToolName,
+  toGeminiContents,
   withBackoff,
   toolsForPolicy,
 } from "./model.js";
@@ -50,7 +56,7 @@ export type { CompareFixture, CompareTask } from "./tasks.js";
 export type { TaskCategory } from "./policy.js";
 export type { ContrastGrade, SlideRaster } from "./contrast.js";
 export type { CompareCliOptions, RepeatStats } from "./report.js";
-export type { CompareDriver } from "./settings.js";
+export type { CompareDriver, CompareProvider } from "./settings.js";
 export type { ModelClient } from "./model.js";
 
 export interface CompareSuiteOptions {

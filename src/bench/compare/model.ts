@@ -1,5 +1,5 @@
 import type { ToolDescriptor } from "../../transport/tools.js";
-import { COMPARE_LIVE_MODEL } from "./settings.js";
+import { COMPARE_LIVE_MODEL, compareProvider } from "./settings.js";
 import { VISION_TOOL_DESCRIPTORS } from "./prompts.js";
 import type { ComparePolicy } from "./protocol.js";
 
@@ -13,6 +13,7 @@ export interface ModelToolCall {
   id: string;
   name: string;
   input: Record<string, unknown>;
+  thoughtSignature?: string;
 }
 
 export interface ModelImageContent {
@@ -33,7 +34,7 @@ export interface ModelMessage {
 
 export type AssistantContent =
   | { type: "text"; text: string }
-  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown> };
+  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; thoughtSignature?: string };
 
 export interface ModelRequest {
   system: string;
@@ -169,6 +170,199 @@ export function createAnthropicClient(
       });
     },
   };
+}
+
+interface GeminiPart {
+  text?: string;
+  thoughtSignature?: string;
+  inlineData?: { mimeType: string; data: string };
+  functionCall?: { name: string; args?: Record<string, unknown> };
+  functionResponse?: { name: string; response: Record<string, unknown> };
+}
+
+interface GeminiContent {
+  role: "user" | "model";
+  parts: GeminiPart[];
+}
+
+interface GeminiApiResponse {
+  candidates?: Array<{
+    content?: { parts?: GeminiPart[] };
+    finishReason?: string;
+  }>;
+  error?: { code?: number; message?: string; status?: string };
+}
+
+/** Gemini function names cannot contain `.`. */
+export function geminiToolName(name: string): string {
+  return name.replaceAll(".", "__");
+}
+
+export function fromGeminiToolName(name: string): string {
+  return name.replaceAll("__", ".");
+}
+
+function asStruct(text: string): Record<string, unknown> {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (isPlain(parsed)) return parsed;
+    return { result: parsed };
+  } catch {
+    return { text };
+  }
+}
+
+function generationConfig(model: string): Record<string, unknown> {
+  const config: Record<string, unknown> = { maxOutputTokens: 2048 };
+  if (model.includes("2.5")) config.thinkingConfig = { thinkingBudget: 0 };
+  else if (model.includes("gemini-3")) config.thinkingConfig = { thinkingLevel: "minimal" };
+  return config;
+}
+
+function geminiParameters(tool: ModelTool): Record<string, unknown> {
+  const properties = tool.input_schema.properties ?? {};
+  const required = tool.input_schema.required ?? [];
+  const parameters: Record<string, unknown> = { type: "object", properties };
+  if (required.length > 0) parameters.required = required;
+  return parameters;
+}
+
+function toolNameById(messages: ModelMessage[]): Map<string, string> {
+  const names = new Map<string, string>();
+  for (const message of messages) {
+    if (message.role !== "assistant" || !Array.isArray(message.content)) continue;
+    for (const part of message.content) {
+      if ("type" in part && part.type === "tool_use") names.set(part.id, part.name);
+    }
+  }
+  return names;
+}
+
+function toolResultParts(
+  part: Extract<ModelContent, { type: "tool_result" }>,
+  names: Map<string, string>,
+): GeminiPart[] {
+  const original = names.get(part.tool_use_id) ?? "unknown";
+  const name = geminiToolName(original);
+  if (typeof part.content === "string") {
+    return [{ functionResponse: { name, response: asStruct(part.content) } }];
+  }
+  const out: GeminiPart[] = [];
+  let response: Record<string, unknown> = {};
+  for (const item of part.content) {
+    if (item.type === "text") response = asStruct(item.text);
+    else if (item.type === "image") {
+      out.push({ inlineData: { mimeType: item.source.media_type, data: item.source.data } });
+    }
+  }
+  out.unshift({ functionResponse: { name, response } });
+  return out;
+}
+
+export function toGeminiContents(messages: ModelMessage[]): GeminiContent[] {
+  const names = toolNameById(messages);
+  const contents: GeminiContent[] = [];
+  for (const message of messages) {
+    if (typeof message.content === "string") {
+      contents.push({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text: message.content }],
+      });
+      continue;
+    }
+    if (message.role === "assistant") {
+      const parts: GeminiPart[] = [];
+      for (const part of message.content as AssistantContent[]) {
+        if (part.type === "text" && part.text) parts.push({ text: part.text });
+        if (part.type === "tool_use") {
+          const geminiPart: GeminiPart = {
+            functionCall:
+              Object.keys(part.input).length > 0
+                ? { name: geminiToolName(part.name), args: part.input }
+                : { name: geminiToolName(part.name) },
+          };
+          if (part.thoughtSignature) geminiPart.thoughtSignature = part.thoughtSignature;
+          parts.push(geminiPart);
+        }
+      }
+      if (parts.length > 0) contents.push({ role: "model", parts });
+      continue;
+    }
+    const parts: GeminiPart[] = [];
+    for (const part of message.content as ModelContent[]) {
+      if (part.type === "text") parts.push({ text: part.text });
+      if (part.type === "tool_result") parts.push(...toolResultParts(part, names));
+    }
+    if (parts.length > 0) contents.push({ role: "user", parts });
+  }
+  return contents;
+}
+
+export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): ModelClient {
+  return {
+    model,
+    async complete(request: ModelRequest): Promise<ModelResponse> {
+      return withBackoff(async () => {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+          {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              "x-goog-api-key": apiKey,
+            },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: request.system }] },
+              contents: toGeminiContents(request.messages),
+              tools: [
+                {
+                  functionDeclarations: request.tools.map((tool) => ({
+                    name: geminiToolName(tool.name),
+                    description: tool.description,
+                    parameters: geminiParameters(tool),
+                  })),
+                },
+              ],
+              generationConfig: generationConfig(model),
+            }),
+          },
+        );
+        const body = (await response.json()) as GeminiApiResponse;
+        if (!response.ok) {
+          throw new RetryableModelError(
+            response.status,
+            body.error?.message ?? `Gemini HTTP ${response.status}`,
+          );
+        }
+        const parts = body.candidates?.[0]?.content?.parts ?? [];
+        const toolCalls: ModelToolCall[] = [];
+        const texts: string[] = [];
+        let i = 0;
+        for (const part of parts) {
+          if (part.functionCall?.name) {
+            i += 1;
+            const call: ModelToolCall = {
+              id: `gemini_${i}_${part.functionCall.name}`,
+              name: fromGeminiToolName(part.functionCall.name),
+              input: part.functionCall.args ?? {},
+            };
+            if (part.thoughtSignature) call.thoughtSignature = part.thoughtSignature;
+            toolCalls.push(call);
+          }
+          if (part.text) texts.push(part.text);
+        }
+        return {
+          text: texts.join("\n"),
+          toolCalls,
+          stop: toolCalls.length > 0 ? "tool" : "end",
+        };
+      });
+    },
+  };
+}
+
+export function createLiveClient(apiKey: string, model = COMPARE_LIVE_MODEL): ModelClient {
+  return compareProvider() === "gemini" ? createGeminiClient(apiKey, model) : createAnthropicClient(apiKey, model);
 }
 
 export function parseStopVerdict(text: string): "DONE" | "FAILED" | undefined {

@@ -1,0 +1,3673 @@
+[
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:22.171Z",
+    "finishedAt": "2026-09-13T13:52:25.189Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 1.72,
+        "observationChars": 2024,
+        "observationTokens": 506
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 3016.89,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:25.189Z",
+    "finishedAt": "2026-09-13T13:52:39.791Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 4.49,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.59,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.5,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.64,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.28,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.36,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 303
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 303
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.23,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.3,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 14601.95,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:39.791Z",
+    "finishedAt": "2026-09-13T13:52:42.567Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.36,
+        "observationChars": 2024,
+        "observationTokens": 506
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 2775.65,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:42.567Z",
+    "finishedAt": "2026-09-13T13:52:55.877Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.27,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.31,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.83,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.25,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.3,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.23,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.46,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 5,
+      "accepted": 2,
+      "rejected": 3,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 13310.32,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 3,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:55.877Z",
+    "finishedAt": "2026-09-13T13:52:58.530Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.39,
+        "observationChars": 2024,
+        "observationTokens": 506
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 2652.43,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:52:58.530Z",
+    "finishedAt": "2026-09-13T13:53:14.906Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 4.17,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.59,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.75,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "click",
+          "x": 45,
+          "y": 554
+        },
+        "action": {
+          "tool": "click",
+          "x": 45,
+          "y": 554
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.99,
+        "observationChars": 714,
+        "observationTokens": 179
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 15,
+          "y": 554
+        },
+        "action": {
+          "tool": "click",
+          "x": 15,
+          "y": 554
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.21,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.33,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 5,
+      "accepted": 2,
+      "rejected": 3,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 16376.07,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 3,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:14.906Z",
+    "finishedAt": "2026-09-13T13:53:17.940Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.29,
+        "observationChars": 2024,
+        "observationTokens": 506
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 3034.51,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:17.940Z",
+    "finishedAt": "2026-09-13T13:53:32.320Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.92,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 348
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 348
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "title_01",
+              "from": [
+                "title_01"
+              ],
+              "to": []
+            }
+          ]
+        },
+        "latencyMs": 0.39,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": []
+        },
+        "latencyMs": 2.79,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "click",
+          "x": 184,
+          "y": -18
+        },
+        "action": {
+          "tool": "click",
+          "x": 184,
+          "y": -18
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": []
+        },
+        "latencyMs": 0.17,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 348
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 348,
+          "mapped": "create_shape"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.23,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": []
+        },
+        "latencyMs": 2.91,
+        "observationChars": 714,
+        "observationTokens": 179
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.19,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": []
+        },
+        "latencyMs": 2.8,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 3,
+      "accepted": 1,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 8,
+      "latencyMs": 14379.03,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 2,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:32.321Z",
+    "finishedAt": "2026-09-13T13:53:35.432Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.26,
+        "observationChars": 2024,
+        "observationTokens": 506
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 3111.57,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Set the title to \"Recovered\".",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Set the title to \"Recovered\".\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:35.432Z",
+    "finishedAt": "2026-09-13T13:53:50.026Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.94,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 300,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 300,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.29,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.31,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.78,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "right_click",
+          "x": 300,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 300,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.26,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.19,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 228
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 228
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.19,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 300,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 300,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 14593.92,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      }
+    ],
+    "model": "gemini-3.6-flash",
+    "hostDriftAfterSteps": 3
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:50.026Z",
+    "finishedAt": "2026-09-13T13:53:53.034Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 1789,
+      "approxTokens": 448,
+      "objectCount": 3
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#0b2545"
+          },
+          "target": "bg_01",
+          "value": "#0b2545"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#0b2545"
+          },
+          "target": "bg_01",
+          "value": "#0b2545"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#0b2545"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0b2545",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.37,
+        "observationChars": 1789,
+        "observationTokens": 448
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 3008.01,
+      "goal": true,
+      "observationChars": 1789,
+      "observationTokens": 448,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(11,37,69)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "15.39:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:53:53.034Z",
+    "finishedAt": "2026-09-13T13:54:01.627Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 372,
+      "approxTokens": 93,
+      "regionCount": 2,
+      "rasterSha256": "e031912628345c3b097882e3c79f7a867f9295f28d21629b598b1ad22934b1a0",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.64,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "bg_01",
+              "from": [
+                "slide_01"
+              ],
+              "to": [
+                "bg_01"
+              ]
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "#1a365d"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#1a365d",
+          "mapped": "set_fill"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1a365d"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1a365d",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.28,
+        "observationChars": 572,
+        "observationTokens": 143
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.04,
+        "observationChars": 572,
+        "observationTokens": 143
+      }
+    ],
+    "metrics": {
+      "attempts": 2,
+      "accepted": 2,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 4,
+      "latencyMs": 8592.84,
+      "goal": true,
+      "observationChars": 372,
+      "observationTokens": 93,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(26,54,93)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "12.14:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:01.627Z",
+    "finishedAt": "2026-09-13T13:54:04.489Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 1789,
+      "approxTokens": 448,
+      "objectCount": 3
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1e3a8a"
+          },
+          "target": "bg_01",
+          "value": "#1e3a8a"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1e3a8a"
+          },
+          "target": "bg_01",
+          "value": "#1e3a8a"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1e3a8a"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1e3a8a",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 1789,
+        "observationTokens": 448
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 2862.21,
+      "goal": true,
+      "observationChars": 1789,
+      "observationTokens": 448,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(30,58,138)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "10.36:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:04.489Z",
+    "finishedAt": "2026-09-13T13:54:15.076Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 372,
+      "approxTokens": 93,
+      "regionCount": 2,
+      "rasterSha256": "e031912628345c3b097882e3c79f7a867f9295f28d21629b598b1ad22934b1a0",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.34,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "bg_01",
+              "from": [
+                "slide_01"
+              ],
+              "to": [
+                "bg_01"
+              ]
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.38,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "#1e3a8a"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#1e3a8a",
+          "mapped": "set_fill"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1e3a8a"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1e3a8a",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.4,
+        "observationChars": 572,
+        "observationTokens": 143
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.91,
+        "observationChars": 572,
+        "observationTokens": 143
+      }
+    ],
+    "metrics": {
+      "attempts": 2,
+      "accepted": 2,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 4,
+      "latencyMs": 10586.78,
+      "goal": true,
+      "observationChars": 372,
+      "observationTokens": 93,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(30,58,138)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "10.36:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:15.076Z",
+    "finishedAt": "2026-09-13T13:54:18.213Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 1789,
+      "approxTokens": 448,
+      "objectCount": 3
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#102a43"
+          },
+          "target": "bg_01",
+          "value": "#102a43"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#102a43"
+          },
+          "target": "bg_01",
+          "value": "#102a43"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#102a43"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#102a43",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.23,
+        "observationChars": 1789,
+        "observationTokens": 448
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 3136.77,
+      "goal": true,
+      "observationChars": 1789,
+      "observationTokens": 448,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(16,42,67)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "14.64:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:18.213Z",
+    "finishedAt": "2026-09-13T13:54:28.154Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 372,
+      "approxTokens": 93,
+      "regionCount": 2,
+      "rasterSha256": "e031912628345c3b097882e3c79f7a867f9295f28d21629b598b1ad22934b1a0",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.86,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 378
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 378
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "bg_01",
+              "from": [
+                "slide_01"
+              ],
+              "to": [
+                "bg_01"
+              ]
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.31,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "#102a43"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#102a43",
+          "mapped": "set_fill"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#102a43"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#102a43",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 572,
+        "observationTokens": 143
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.05,
+        "observationChars": 572,
+        "observationTokens": 143
+      }
+    ],
+    "metrics": {
+      "attempts": 2,
+      "accepted": 2,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 4,
+      "latencyMs": 9941.05,
+      "goal": true,
+      "observationChars": 372,
+      "observationTokens": 93,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(16,42,67)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "14.64:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:28.154Z",
+    "finishedAt": "2026-09-13T13:54:30.844Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 1789,
+      "approxTokens": 448,
+      "objectCount": 3
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1a365d"
+          },
+          "target": "bg_01",
+          "value": "#1a365d"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1a365d"
+          },
+          "target": "bg_01",
+          "value": "#1a365d"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1a365d"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1a365d",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 1789,
+        "observationTokens": 448
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 2689.41,
+      "goal": true,
+      "observationChars": 1789,
+      "observationTokens": 448,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(26,54,93)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "12.14:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:30.844Z",
+    "finishedAt": "2026-09-13T13:54:38.548Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 372,
+      "approxTokens": 93,
+      "regionCount": 2,
+      "rasterSha256": "e031912628345c3b097882e3c79f7a867f9295f28d21629b598b1ad22934b1a0",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.58,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 228
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "bg_01",
+              "from": [
+                "slide_01"
+              ],
+              "to": [
+                "bg_01"
+              ]
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.24,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "#1a365d"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#1a365d",
+          "mapped": "set_fill"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1a365d"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1a365d",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.23,
+        "observationChars": 572,
+        "observationTokens": 143
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.06,
+        "observationChars": 572,
+        "observationTokens": 143
+      }
+    ],
+    "metrics": {
+      "attempts": 2,
+      "accepted": 2,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 4,
+      "latencyMs": 7704.43,
+      "goal": true,
+      "observationChars": 372,
+      "observationTokens": 93,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(26,54,93)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "12.14:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:38.548Z",
+    "finishedAt": "2026-09-13T13:54:41.106Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 1789,
+      "approxTokens": 448,
+      "objectCount": 3
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1e3a8a"
+          },
+          "target": "bg_01",
+          "value": "#1e3a8a"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#1e3a8a"
+          },
+          "target": "bg_01",
+          "value": "#1e3a8a"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1e3a8a"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1e3a8a",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.22,
+        "observationChars": 1789,
+        "observationTokens": 448
+      }
+    ],
+    "metrics": {
+      "attempts": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 1,
+      "steps": 1,
+      "latencyMs": 2557.28,
+      "goal": true,
+      "observationChars": 1789,
+      "observationTokens": 448,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(30,58,138)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "10.36:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 3,
+    "adapter": "slides",
+    "task": "contrast_check",
+    "taskCategory": "vision-favorable",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Change the slide background color to a darker shade of blue.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the slide background color to a darker shade of blue.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T13:54:41.106Z",
+    "finishedAt": "2026-09-13T13:54:49.147Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 372,
+      "approxTokens": 93,
+      "regionCount": 2,
+      "rasterSha256": "e031912628345c3b097882e3c79f7a867f9295f28d21629b598b1ad22934b1a0",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.82,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 378
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 150,
+          "y": 378
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "select",
+              "target": "bg_01",
+              "from": [
+                "slide_01"
+              ],
+              "to": [
+                "bg_01"
+              ]
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 535,
+        "observationTokens": 134
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "#1a365d"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#1a365d",
+          "mapped": "set_fill"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "bg_01",
+              "path": "properties.fill",
+              "from": "#f4f7fb",
+              "to": "#1a365d"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#f4f7fb",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            },
+            "after": {
+              "id": "bg_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#1a365d",
+                "text": "",
+                "x": 0,
+                "y": 0,
+                "width": 960,
+                "height": 540,
+                "z": 0
+              }
+            }
+          }
+        },
+        "latencyMs": 0.24,
+        "observationChars": 572,
+        "observationTokens": 143
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.21,
+        "observationChars": 572,
+        "observationTokens": 143
+      }
+    ],
+    "metrics": {
+      "attempts": 2,
+      "accepted": 2,
+      "rejected": 0,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 4,
+      "latencyMs": 8040.92,
+      "goal": true,
+      "observationChars": 372,
+      "observationTokens": 93,
+      "hostDiverged": 0,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "background_darker_blue",
+        "ok": true,
+        "detail": "rgb(26,54,93)"
+      },
+      {
+        "id": "wcag_contrast",
+        "ok": true,
+        "detail": "12.14:1 text=#ffffff"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  }
+]
