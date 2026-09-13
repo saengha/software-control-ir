@@ -6,7 +6,7 @@ export const COMPARE_LIVE_MODEL = process.env.SCIR_COMPARE_MODEL ?? "claude-sonn
 
 export const COMPARE_REPEATS = 5;
 
-/** After this many tool calls, host_drift mutates the document out of band. */
+/** Unused by the frozen v4 host_drift task (injectWhen). Kept so older notes still resolve. */
 export const HOST_DRIFT_AFTER_STEPS = 3;
 
 export const COMPARE_DRIVERS = ["scripted", "live"] as const;

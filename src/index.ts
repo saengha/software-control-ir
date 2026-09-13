@@ -59,6 +59,7 @@ export {
   COMPARE_TASK_IDS,
   COMPARE_TASKS,
   HOST_DRIFT_AFTER_STEPS,
+  HOST_INJECT_CONTINUE,
   LOCKED_TARGET_POLICY,
   STRUCTURED_PROMPT,
   TASK_CATEGORIES,
@@ -99,10 +100,13 @@ export {
   runSlidesCompareLive,
   sampleStdev,
   toGeminiContents,
+  geminiContentsIncludeHostDiverged,
   visionJsonContainsSecrets,
   visionToolFeedback,
   withBackoff,
 } from "./bench/compare/index.js";
+export { runHostDivergedProbe, formatHostDivergedProbe } from "./bench/compare/probe-diverged.js";
+export type { HostDivergedProbeLog, ProbeTurn } from "./bench/compare/probe-diverged.js";
 export type {
   CompareCliOptions,
   CompareDriver,

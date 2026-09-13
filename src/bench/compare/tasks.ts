@@ -8,7 +8,6 @@ import type { GoalCheck } from "../run.js";
 import { formatContrastRatio, gradeRenderedContrast } from "./contrast.js";
 import type { SlideRaster } from "./contrast.js";
 import { LOCKED_TARGET_POLICY, TASK_CATEGORY, lockedTargetFillAccepted, type TaskCategory } from "./policy.js";
-import { HOST_DRIFT_AFTER_STEPS } from "./settings.js";
 import { COMPARE_TASK_IDS, isSeedShapeId, type ComparePolicy, type CompareTaskId } from "./protocol.js";
 
 export interface CompareContext {
@@ -37,6 +36,8 @@ export interface CompareTask {
   inject?: HostInject;
   /** Mutate the host after this many tool calls. Omit to inject before the loop. */
   injectAfterSteps?: number;
+  /** Mutate the host when this snapshot predicate first holds. */
+  injectWhen?: (state: State) => boolean;
   /** When true, verdict comes from the final rendered image, not IR success. */
   gradeFromRender?: boolean;
   goal: (state: State, ctx: CompareGradeContext) => GoalCheck[];
@@ -82,6 +83,7 @@ function boardClicks(adapterId: string) {
 }
 
 const STEPS = 8;
+const HOST_DRIFT_FILL = "#2f6f5f";
 
 export const COMPARE_TASKS: CompareTask[] = [
   {
@@ -275,31 +277,37 @@ export const COMPARE_TASKS: CompareTask[] = [
     id: "host_drift",
     category: "gated",
     fixture: "board",
-    goalText: 'Set the title to "Recovered".',
+    goalText: 'Change the title to "Recovered" and set its fill to #2f6f5f.',
     maxSteps: STEPS,
     inject: { action: "set_text", target: "title_01", params: { value: "Out of band" } },
-    injectAfterSteps: HOST_DRIFT_AFTER_STEPS,
+    injectWhen: (state) => textOf(state, "title_01") === "Recovered",
     goal: (state) => [
       {
         id: "title_recovered",
         ok: textOf(state, "title_01") === "Recovered",
         detail: textOf(state, "title_01") || "missing",
       },
+      {
+        id: "title_fill",
+        ok: fillOf(state, "title_01") === HOST_DRIFT_FILL,
+        detail: fillOf(state, "title_01") || "missing",
+      },
     ],
     script: (policy) =>
       policy === "structured"
         ? [
-            { action: "select", target: "title_01" },
-            { action: "select", target: "accent_01" },
-            { action: "select", target: "title_01" },
+            { action: "set_text", target: "title_01", value: "Recovered" },
+            { action: "set_fill", target: "title_01", value: HOST_DRIFT_FILL },
             { action: "sync" },
             { action: "set_text", target: "title_01", value: "Recovered" },
+            { action: "set_fill", target: "title_01", value: HOST_DRIFT_FILL },
           ]
         : [
             { tool: "screenshot" },
             { tool: "click", look: { textIncludes: "Quarterly Review" } },
             { tool: "type", text: "Recovered" },
-            { tool: "click", look: { textIncludes: "Recovered" } },
+            { tool: "right_click", look: { textIncludes: "Out of band" } },
+            { tool: "type", text: HOST_DRIFT_FILL },
           ],
   },
   {

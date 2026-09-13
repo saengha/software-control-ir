@@ -2,7 +2,7 @@ import type { Operation } from "../../ir/types.js";
 
 export const COMPARE_PROTOCOL = {
   id: "scir-compare-v0",
-  version: 3,
+  version: 4,
 } as const;
 
 export const STRUCTURED_PROMPT = `You control a slide editor through a structured tool API.

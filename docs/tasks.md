@@ -1,16 +1,16 @@
 # Compare tasks
 
-Fixed goals for `scir-compare-v0` (prompt set v3, experiment log `schema/experiment.v2.json`). Both policies get the same `goalText`, the same step budget, and — when live — the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). Frozen scripts remain available via `npm run compare:scripted`.
+Fixed goals for `scir-compare-v0` (prompt set **v4, frozen**, experiment log `schema/experiment.v2.json`). Both policies get the same `goalText`, the same step budget, and — when live — the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). Frozen scripts remain available via `npm run compare:scripted`.
 
-Live: `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`). Each tool call is one step. Default live model in `.env` is `gemini-3.6-flash`; structured and vision must share it. `gemini-2.5-flash` is closed to new keys.
+Do not add recovery hints to the prompts. Do not change this task set to chase a higher live rate. The next measurement is the 90-run.
 
-A live model can finish `host_drift` in one `set_text` before `HOST_DRIFT_AFTER_STEPS`. The structured 5/5 in the 2026-09-13 pilot is not a drift-recovery result. See `results/`.
+Live: `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`). Each tool call is one step. Structured and vision must share the model.
 
-Recommended order before a full `9 × 2 × 5` run:
+Recommended order:
 
 1. `npm run compare:scripted` — frozen scripts, no API.
-2. `npm run compare:pilot` — live `contrast_check` + `host_drift`, N=5, slides only.
-3. Full live: `npx tsx examples/compare.ts --repeats=5 --adapter=all`
+2. `npm run compare:pilot-drift` — live `host_drift` only, N=5, slides.
+3. Full live 90-run: `npx tsx examples/compare.ts --repeats=5 --adapter=slides`.
 
 `--task=` filters the suite (comma-separated ids). `--category=` filters by `execution` / `gated` / `vision-favorable`.
 
@@ -26,7 +26,26 @@ Vision tool results must not carry IR fields (`"locked": true`, object ids, `eff
 
 ## host_drift
 
-`goalText` is only `Set the title to "Recovered".` The harness mutates the host after `HOST_DRIFT_AFTER_STEPS` (default 3) tool calls. That number is logged as `hostDriftAfterSteps`. Structured must `sync` after the divergence; vision has no `sync` tool.
+Shared `goalText`: `Change the title to "Recovered" and set its fill to #2f6f5f.`
+
+Two required state changes. A single title rename cannot pass. After `title_01` text first becomes `"Recovered"`, the harness sets that text to `"Out of band"` out of band. The following apply is `host_diverged`. The prompt does not mention drift or sync.
+
+Structured `DONE` only if all of these hold:
+
+- `hostDiverged > 0`
+- accepted `sync` (`usedSync`)
+- accepted `set_text` / `set_fill` retry after that sync
+- title text `"Recovered"` and fill `#2f6f5f`
+
+Vision has no `sync` tool. `FAILED` with `hostDiverged > 0` is the structurally expected gated outcome.
+
+Scripted structured: `set_text` → `set_fill` (diverges) → `sync` → `set_text` → `set_fill`.
+
+```bash
+npm run compare:pilot-drift
+```
+
+`npm run compare:probe-diverged` is a diagnostic, not the official benchmark. It must not be folded into the live loop.
 
 ## recover_title
 

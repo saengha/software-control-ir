@@ -488,7 +488,7 @@ I don't know the answer yet. That's the reason for building this project.
 
 The first measurement is not “many applications.” It is one fixed protocol against a software-shaped adapter and, when LibreOffice is installed, against a live `.odp`.
 
-The protocol is `scir-compare-v0` (prompt set **v3**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). They do not get the same tools:
+The protocol is `scir-compare-v0` (prompt set **v4**, **FROZEN**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). They do not get the same tools:
 
 ```
 Screenshots + click / type / scroll / right_click
@@ -513,7 +513,7 @@ Nine goals, in three categories (see `docs/tasks.md`):
 
 Do not treat the overall win rate as the result. Gated tasks are structurally easier for the structured policy. The report prints that warning next to the combined table.
 
-`host_drift` is not a mock flag. After `HOST_DRIFT_AFTER_STEPS` (default 3) tool calls, the harness mutates **`title_01` text** to `"Out of band"` behind the session. The goal is only `Set the title to "Recovered".` Structured must `sync` before it can finish the edit. Vision has no `sync` tool.
+`host_drift` is frozen as a two-edit gated recovery task. The shared goal is `Change the title to "Recovered" and set its fill to #2f6f5f.` One `set_text` cannot pass. After the title text first becomes `"Recovered"`, the harness mutates that text to `"Out of band"` out of band. The next apply returns `host_diverged`. Structured `DONE` requires `hostDiverged > 0`, an accepted `sync`, an accepted title/fill retry after that sync, and both goal checks. Vision has no `sync` tool. The prompt does not mention drift or sync. The live loop does not send `Continue.` to keep a run open.
 
 `contrast_check` uses a separate fixture (`fixtures/impress/contrast.odp` / slides `contrast` preset): white text on a light background. The structured script’s fill can succeed in IR and still fail the raster grader (WCAG AA 4.5:1). That is the point of the task.
 
@@ -552,13 +552,13 @@ Impress loads `fixtures/impress/board.odp` (and `contrast.odp` for `contrast_che
 
 Code lives in `src/bench/compare/`. CLI: `examples/compare.ts`.
 
-- Prompt set v3. Frozen prompt **text** is unchanged from v2; the version bump is for the live driver, repeats, and log fields.
+- Prompt set **v4 (frozen)**. Prompt **text** is still the v2 wording (no recovery hints). The bump is the two-edit `host_drift` task, inject-after-first-title-edit, and strict recovery scoring.
 - Experiment log: `schema/experiment.v2.json` (required `taskCategory`, `driver`, `runIndex`; optional `model`, `hostDriftAfterSteps`). v0/v1 are deprecated; `npm run migrate:experiment` rewrites old logs.
 - Default repeats **N=5**. Report prints `5/5`-style rates, sample standard deviation (`s_σ` / `v_σ`), category subtables, and a `spread` mark when repeats disagree.
 - Live path: Gemini (`GEMINI_API_KEY`, default `gemini-3.6-flash`) or Anthropic. Structured uses `toolDescriptors()` / `createDispatcher()`. Vision uses a PNG screenshot and maps clicks through `src/bench/compare/ui.ts`. Thinking is set to minimal on Gemini 3 so output tokens stay cheap.
 - Replay client (`createReplayClient`) drives the **same** live loop with frozen scripts so the loop is tested without spending API budget.
 - `--dry-run` forces N=1. `--scripted` uses frozen scripts. `--adapter=slides|impress|all`. `--category=`. `--task=id,id` for a subset (used by the pilot).
-- This Windows npm does **not** forward `npm run compare -- --scripted`. Use `npm run compare:scripted`, `npm run compare:dry`, `npm run compare:pilot`, or `npx tsx examples/compare.ts ...`.
+- This Windows npm does **not** forward `npm run compare -- --scripted`. Use `npm run compare:scripted`, `npm run compare:dry`, `npm run compare:pilot`, `npm run compare:pilot-drift`, or `npx tsx examples/compare.ts ...`.
 
 ### Protocol bugs found before burning a 90-run
 
@@ -570,13 +570,13 @@ These are cheap to miss in a scripted dry-run and expensive to discover after 90
 
 Now the vision model only gets screenshot pixels plus visible chrome: toolbar, slide tabs, optional panel `{ fill, text }`, optional toast. The driver still knows lock state internally; experiment logs still store `step.result` for the experimenter. Tests assert that live vision `tool_result` JSON does not contain `"locked":`, seed object ids, `effects`, or `issues`. A locked edit toast is `This object cannot be edited.` — it does not name the IR field.
 
-**2. `host_drift` mutates the title, not some other field. Confirmed.**
+**2. `host_drift` mutates the title text after the first required edit. Frozen in v4.**
 
-The inject is `set_text` on `title_01` to `"Out of band"`. That is the same field the goal edits. Structured will hit `host_diverged` on the next apply unless it `sync`s — **if it is still running when the inject fires**.
+The inject is `set_text` on `title_01` to `"Out of band"`, after the title first becomes `"Recovered"`. The second required edit (`set_fill`) then hits `host_diverged`. Structured recovery is scored only if the agent syncs and retries. Vision has no `sync`.
 
-**3. Live structured can finish `host_drift` before the inject. Seen in the pilot.**
+**3. A one-edit title goal let live structured finish before inject. Frozen by changing the task, not by sending `Continue.`**
 
-`HOST_DRIFT_AFTER_STEPS` is 3. `gemini-3.6-flash` renamed the title in one `set_text` (5/5, `usedSync=false`, `hostDiverged=0`). The 5/5 is not a recovery measurement. Vision did hit drift and went 0/5, title stuck on `"Out of band"`. Fix inject timing before a 90-run if structured is supposed to meet `host_diverged`.
+v4 requires title text and title fill. The 2026-09-13 one-step `set_text` rates are not this measurement. `functionCallingConfig.mode=ANY` was a diagnostic probe only; it is not part of the official loop.
 
 ### What has been measured
 
@@ -586,19 +586,20 @@ The inject is `set_text` on `title_01` to `"Out of band"`. That is the same fiel
 | Live loop, all 9 × 2, replay client | slides | live loop, no API | Tests pass. The loop, PNG codec, click mapping, inject timing, and tool wiring are exercised. |
 | Impress conformance + compare (scripted) | live `.odp` | tests | LibreOffice path works when installed: private profile, UNO mutate, host drift, snapshot rewrite. |
 | Live model, `contrast_check` + `host_drift`, N=5 (pilot) | slides | `gemini-3.6-flash` | **Done.** [results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md](results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md). `contrast_check` 5/5 vs 5/5 (scripted split did not reproduce). `host_drift` 5/5 vs 0/5, but structured never saw drift. |
-| Live model, full 9 × 2 × 5 (90) | slides / impress | same model both policies | **Not run.** Fix `host_drift` inject timing first. |
+| Live model, `host_drift` only, N=5 (v4 freeze check) | slides | `gemini-3.6-flash` | **Done.** [results/2026-09-13-slides-gemini-3.6-flash-n5-host_drift.md](results/2026-09-13-slides-gemini-3.6-flash-n5-host_drift.md). Structured **5/5** with `host_diverged` → `sync` → retry. Vision **0/5**, `hostDiverged` 4/run, no `sync`. |
+| Live model, full 9 × 2 × 5 (90) | slides / impress | same model both policies | **Not run.** Protocol v4 is frozen; this is the next measurement. |
 
 Scripted vision “success” is a script hitting the right pixels. It is not evidence that a vision model can do the task. The live pilot is the first same-model measurement; the 90-run is still missing.
 
 ### What to run next
 
-1. Decide `host_drift` inject timing so a one-step structured edit still meets `host_diverged`.
-2. Do **not** burn the 90-run until that is fixed. The pilot already showed the scripted `contrast_check` split does not hold for `gemini-3.6-flash`.
-3. Do not interpret a combined win rate as the headline. Read the category tables.
+1. Full live 90-run (9 tasks × 2 policies × 5) on v4. Read category tables, not the combined rate.
+2. Do not change `host_drift` or the compare protocol to chase a higher rate.
+3. Optional: same live protocol against Impress.
 
 ### Tests
 
-`npm test` is currently **111** tests (Vitest). Impress tests skip or run depending on LibreOffice + fixtures. `npm run typecheck` is clean.
+`npm test` is currently **118** tests (Vitest). Impress tests skip or run depending on LibreOffice + fixtures. `npm run typecheck` is clean.
 
 ## Current status
 
@@ -623,7 +624,7 @@ This repository currently includes:
 - the catalog projected as typed tool descriptors, with a dispatcher
 - action traces that can be replayed
 - a measurement harness: structured vs naive scripts, rollback recovery, batch atomicity, and state size
-- a fixed compare protocol (`scir-compare-v0` v3): nine tasks, scripted baseline **and** a live model loop, experiment logs in `schema/experiment.v2.json`
+- a fixed compare protocol (`scir-compare-v0` **v4, frozen**): nine tasks, scripted baseline **and** a live model loop, experiment logs in `schema/experiment.v2.json`
 - shared conformance checks against lab, slides, and Impress when LibreOffice is installed
 - a JSON schema that real session output is tested against
 - a local demo that places pixel space next to structured state
@@ -662,7 +663,7 @@ The Impress adapter talks to a live LibreOffice document over UNO. It loads comm
 - [x] Build a live model loop (same model for structured and vision; PNG screenshots; N repeats)
 - [x] Stop vision tool results from leaking IR lock fields and object ids
 - [x] Run the live pilot (`contrast_check` + `host_drift`, N=5) against `gemini-3.6-flash`
-- [ ] Fix live `host_drift` inject timing so structured actually meets `host_diverged`
+- [x] Freeze compare protocol v4: two-edit `host_drift`, inject after first title edit, strict sync/retry scoring
 - [ ] Run the full live 90-run (9 tasks × 2 policies × 5) and read category tables, not the combined rate
 - [ ] Optional: same live protocol against Impress
 - [ ] Refine the IR based on those measurements, not on the scripted baseline
@@ -696,6 +697,7 @@ npm run bench
 npm run compare:scripted
 npm run compare:dry
 npm run compare:pilot
+npm run compare:pilot-drift
 npm run dev
 ```
 
@@ -710,6 +712,8 @@ Default `npm run compare` is the **live** driver and exits if there is no API ke
 | `npm run compare:scripted` | Frozen scripts, N=5, slides + Impress if present |
 | `npm run compare:dry` | Scripted, N=1 |
 | `npm run compare:pilot` | **Live** `contrast_check` + `host_drift`, N=5, slides only. Needs an API key |
+| `npm run compare:pilot-drift` | **Live** `host_drift` only, N=5, slides. Check `usedSync` / `hostDiverged` |
+| `npm run compare:probe-diverged` | **Live** structured-only probe: what happens after a real `host_diverged` tool_result |
 | `npx tsx examples/compare.ts --scripted --adapter=slides --repeats=5` | Scripted slides 90-run |
 | `npx tsx examples/compare.ts --task=contrast_check --repeats=5 --adapter=slides` | Live one-task subset |
 

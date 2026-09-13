@@ -21,6 +21,8 @@
     "compare:scripted": "tsx examples/compare.ts --scripted",
     "compare:dry": "tsx examples/compare.ts --scripted --dry-run",
     "compare:pilot": "tsx examples/compare.ts --task=contrast_check,host_drift --repeats=5 --adapter=slides",
+    "compare:pilot-drift": "tsx examples/compare.ts --task=host_drift --repeats=5 --adapter=slides",
+    "compare:probe-diverged": "tsx examples/probe-host-diverged.ts --repeats=3",
     "migrate:experiment": "tsx examples/migrate-experiment.ts",
     "fixture:impress-contrast": "tsx examples/write-contrast-odp.ts"
   },

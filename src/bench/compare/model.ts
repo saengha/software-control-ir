@@ -36,10 +36,14 @@ export type AssistantContent =
   | { type: "text"; text: string }
   | { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; thoughtSignature?: string };
 
+export type FunctionCallMode = "auto" | "any";
+
 export interface ModelRequest {
   system: string;
   tools: ModelTool[];
   messages: ModelMessage[];
+  /** Default auto. Probe-only: force a function call without changing the prompt. */
+  functionCallMode?: FunctionCallMode;
 }
 
 export interface ModelResponse {
@@ -139,12 +143,13 @@ export function createAnthropicClient(
             "x-api-key": apiKey,
             "anthropic-version": "2023-06-01",
           },
-          body: JSON.stringify({
+            body: JSON.stringify({
             model,
             max_tokens: 2048,
             system: request.system,
             tools: request.tools,
             messages: request.messages,
+            ...(request.functionCallMode === "any" ? { tool_choice: { type: "any" } } : {}),
           }),
         });
         const body = (await response.json()) as AnthropicResponse;
@@ -298,6 +303,10 @@ export function toGeminiContents(messages: ModelMessage[]): GeminiContent[] {
   return contents;
 }
 
+export function geminiContentsIncludeHostDiverged(messages: ModelMessage[]): boolean {
+  return JSON.stringify(toGeminiContents(messages)).includes("host_diverged");
+}
+
 export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): ModelClient {
   return {
     model,
@@ -324,6 +333,9 @@ export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): 
                 },
               ],
               generationConfig: generationConfig(model),
+              ...(request.functionCallMode === "any"
+                ? { toolConfig: { functionCallingConfig: { mode: "ANY" } } }
+                : {}),
             }),
           },
         );

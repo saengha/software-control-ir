@@ -18,9 +18,12 @@ import { observeVision } from "./observe.js";
 import type { ComparePolicy } from "./protocol.js";
 import type { CompareTask } from "./tasks.js";
 import type { ModelClient, ModelContent, ModelMessage, ModelToolCall } from "./model.js";
-import { parseStopVerdict, toolsForPolicy } from "./model.js";
+import { toolsForPolicy } from "./model.js";
 import { visionToolFeedback, type UiChrome } from "./ui.js";
 import { captureVisionFrame, imageToWorld, type VisionFrame } from "./vision-frame.js";
+
+/** Probe-only user turn. Official compare live loop does not send this. */
+export const HOST_INJECT_CONTINUE = "Continue.";
 
 function asCompact(session: Session, value: unknown): CompactResult & { rolledBack?: boolean } {
   if (
@@ -110,6 +113,7 @@ export async function runCompareLive(
   while (steps.length < task.maxSteps) {
     const reply = await client.complete({ system: prompt, tools, messages });
     if (reply.toolCalls.length === 0) {
+      messages.push({ role: "assistant", content: reply.text || "DONE" });
       break;
     }
 
@@ -180,7 +184,6 @@ export async function runCompareLive(
         observationChars: size.chars,
         observationTokens: size.approxTokens,
       });
-      injected = injectHostIfDue(adapter, session, task, steps.length, injected);
 
       if (policy === "vision" && call.name === "screenshot" && frame) {
         toolResults.push({
@@ -214,10 +217,9 @@ export async function runCompareLive(
           content: JSON.stringify({ result, state: session.relevant() }),
         });
       }
+      injected = injectHostIfDue(adapter, session, task, steps.length, injected);
     }
     messages.push({ role: "user", content: toolResults });
-
-    if (parseStopVerdict(reply.text) && reply.toolCalls.length === 0) break;
   }
 
   const runOptions: CompareRunOptions = {

@@ -12,8 +12,8 @@ export { COMPARE_POLICIES, COMPARE_PROTOCOL, COMPARE_TASK_IDS, STRUCTURED_PROMPT
 export { COMPARE_TASKS } from "./tasks.js";
 export { bindPolicyAction, observeStructured, observeVision, visionJsonContainsSecrets } from "./observe.js";
 export { executeUiAction, visibleChrome, visionToolFeedback } from "./ui.js";
-export { runCompare } from "./run.js";
-export { runCompareLive } from "./live.js";
+export { runCompare, taskGoalHolds } from "./run.js";
+export { runCompareLive, HOST_INJECT_CONTINUE } from "./live.js";
 export {
   COMPARE_OVERALL_WARNING,
   SPREAD_MARK,
@@ -47,9 +47,11 @@ export {
   fromGeminiToolName,
   geminiToolName,
   toGeminiContents,
+  geminiContentsIncludeHostDiverged,
   withBackoff,
   toolsForPolicy,
 } from "./model.js";
+export { runHostDivergedProbe, formatHostDivergedProbe } from "./probe-diverged.js";
 export type { CompareMetrics, CompareRunLog, CompareRunOptions, CompareStepLog, CompareVerdict } from "./run.js";
 export type { ComparePolicy, CompareTaskId } from "./protocol.js";
 export type { CompareFixture, CompareTask } from "./tasks.js";
@@ -58,6 +60,7 @@ export type { ContrastGrade, SlideRaster } from "./contrast.js";
 export type { CompareCliOptions, RepeatStats } from "./report.js";
 export type { CompareDriver, CompareProvider } from "./settings.js";
 export type { ModelClient } from "./model.js";
+export type { HostDivergedProbeLog, ProbeTurn } from "./probe-diverged.js";
 
 export interface CompareSuiteOptions {
   reset?: () => void;

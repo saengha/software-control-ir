@@ -1,0 +1,708 @@
+[
+  {
+    "task": "host_drift",
+    "policy": "structured",
+    "model": "gemini-3.6-flash",
+    "runIndex": 0,
+    "delivery": "forced_any",
+    "hostDivergedInGeminiPayload": true,
+    "modelSawDivergedInRequest": true,
+    "geminiFunctionResponseAfterDiverged": {
+      "name": "slides__set_text",
+      "response": {
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "state": {
+          "revision": 1,
+          "objects": [
+            {
+              "id": "slide_01",
+              "type": "slide",
+              "properties": {
+                "title": "Title",
+                "width": 960,
+                "height": 540,
+                "locked": false
+              }
+            },
+            {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            {
+              "id": "accent_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#e6a23c",
+                "text": "",
+                "x": 80,
+                "y": 180,
+                "width": 240,
+                "height": 16,
+                "z": 2
+              }
+            },
+            {
+              "id": "logo_01",
+              "type": "ellipse",
+              "parent": "slide_01",
+              "properties": {
+                "locked": true,
+                "fill": "#8fd0c4",
+                "text": "",
+                "x": 820,
+                "y": 430,
+                "width": 60,
+                "height": 60,
+                "z": 3
+              }
+            }
+          ],
+          "selection": [
+            "title_01"
+          ],
+          "meta": {
+            "activeSlide": "slide_01"
+          }
+        }
+      }
+    },
+    "understoodInText": false,
+    "calledSync": true,
+    "retriedAfterSync": true,
+    "recovered": true,
+    "finalTitle": "Recovered",
+    "turns": [
+      {
+        "i": 0,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "value": "Recovered",
+              "target": "title_01",
+              "expectedRevision": 0
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 1,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 2,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 3,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 4,
+        "functionCallMode": "any",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.state",
+            "input": {
+              "scope": "relevant"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 5,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "target": "title_01",
+              "value": "Recovered",
+              "expectedRevision": 1
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "rejected",
+            "issues": [
+              "host_diverged"
+            ]
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 6,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.sync",
+            "input": {}
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 7,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "value": "Recovered",
+              "target": "title_01",
+              "expectedRevision": 2
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 8,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": true
+      }
+    ]
+  },
+  {
+    "task": "host_drift",
+    "policy": "structured",
+    "model": "gemini-3.6-flash",
+    "runIndex": 1,
+    "delivery": "forced_any",
+    "hostDivergedInGeminiPayload": true,
+    "modelSawDivergedInRequest": true,
+    "geminiFunctionResponseAfterDiverged": {
+      "name": "slides__set_text",
+      "response": {
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "state": {
+          "revision": 1,
+          "objects": [
+            {
+              "id": "slide_01",
+              "type": "slide",
+              "properties": {
+                "title": "Title",
+                "width": 960,
+                "height": 540,
+                "locked": false
+              }
+            },
+            {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            {
+              "id": "accent_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#e6a23c",
+                "text": "",
+                "x": 80,
+                "y": 180,
+                "width": 240,
+                "height": 16,
+                "z": 2
+              }
+            },
+            {
+              "id": "logo_01",
+              "type": "ellipse",
+              "parent": "slide_01",
+              "properties": {
+                "locked": true,
+                "fill": "#8fd0c4",
+                "text": "",
+                "x": 820,
+                "y": 430,
+                "width": 60,
+                "height": 60,
+                "z": 3
+              }
+            }
+          ],
+          "selection": [
+            "title_01"
+          ],
+          "meta": {
+            "activeSlide": "slide_01"
+          }
+        }
+      }
+    },
+    "understoodInText": false,
+    "calledSync": true,
+    "retriedAfterSync": true,
+    "recovered": true,
+    "finalTitle": "Recovered",
+    "turns": [
+      {
+        "i": 0,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "expectedRevision": 0,
+              "target": "title_01",
+              "value": "Recovered"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 1,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 2,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 3,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 4,
+        "functionCallMode": "any",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.state",
+            "input": {
+              "scope": "relevant"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 5,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "target": "title_01",
+              "expectedRevision": 1,
+              "value": "Recovered"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "rejected",
+            "issues": [
+              "host_diverged"
+            ]
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 6,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.sync",
+            "input": {}
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 7,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "value": "Recovered",
+              "target": "title_01",
+              "expectedRevision": 2
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 8,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": true
+      }
+    ]
+  },
+  {
+    "task": "host_drift",
+    "policy": "structured",
+    "model": "gemini-3.6-flash",
+    "runIndex": 2,
+    "delivery": "forced_any",
+    "hostDivergedInGeminiPayload": true,
+    "modelSawDivergedInRequest": true,
+    "geminiFunctionResponseAfterDiverged": {
+      "name": "slides__set_text",
+      "response": {
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "state": {
+          "revision": 1,
+          "objects": [
+            {
+              "id": "slide_01",
+              "type": "slide",
+              "properties": {
+                "title": "Title",
+                "width": 960,
+                "height": 540,
+                "locked": false
+              }
+            },
+            {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            {
+              "id": "accent_01",
+              "type": "rectangle",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#e6a23c",
+                "text": "",
+                "x": 80,
+                "y": 180,
+                "width": 240,
+                "height": 16,
+                "z": 2
+              }
+            },
+            {
+              "id": "logo_01",
+              "type": "ellipse",
+              "parent": "slide_01",
+              "properties": {
+                "locked": true,
+                "fill": "#8fd0c4",
+                "text": "",
+                "x": 820,
+                "y": 430,
+                "width": 60,
+                "height": 60,
+                "z": 3
+              }
+            }
+          ],
+          "selection": [
+            "title_01"
+          ],
+          "meta": {
+            "activeSlide": "slide_01"
+          }
+        }
+      }
+    },
+    "understoodInText": false,
+    "calledSync": true,
+    "retriedAfterSync": true,
+    "recovered": true,
+    "finalTitle": "Recovered",
+    "turns": [
+      {
+        "i": 0,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "expectedRevision": 0,
+              "target": "title_01",
+              "value": "Recovered"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 1,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 2,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 3,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 4,
+        "functionCallMode": "any",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.state",
+            "input": {}
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 5,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "expectedRevision": 1,
+              "value": "Recovered",
+              "target": "title_01"
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "rejected",
+            "issues": [
+              "host_diverged"
+            ]
+          }
+        ],
+        "requestHasHostDiverged": false
+      },
+      {
+        "i": 6,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "scir.sync",
+            "input": {}
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 7,
+        "functionCallMode": "auto",
+        "assistantText": "",
+        "toolCalls": [
+          {
+            "name": "slides.set_text",
+            "input": {
+              "value": "Recovered",
+              "target": "title_01",
+              "expectedRevision": 2
+            }
+          }
+        ],
+        "results": [
+          {
+            "status": "accepted",
+            "issues": []
+          }
+        ],
+        "requestHasHostDiverged": true
+      },
+      {
+        "i": 8,
+        "functionCallMode": "auto",
+        "assistantText": "DONE",
+        "toolCalls": [],
+        "results": [],
+        "requestHasHostDiverged": true
+      }
+    ]
+  }
+]

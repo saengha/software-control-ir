@@ -43,7 +43,7 @@ describe("compare protocol", () => {
   it("fixes nine tasks, two prompts, and the same N", () => {
     expect(COMPARE_TASK_IDS).toHaveLength(9);
     expect(logs).toHaveLength(18);
-    expect(logs.every((log) => log.protocol === COMPARE_PROTOCOL.id && log.protocolVersion === 3)).toBe(true);
+    expect(logs.every((log) => log.protocol === COMPARE_PROTOCOL.id && log.protocolVersion === 4)).toBe(true);
     expect(logs.every((log) => log.driver === "scripted" && log.runIndex === 0)).toBe(true);
     for (const task of COMPARE_TASK_IDS) {
       const structured = byTask(logs, task, "structured");
@@ -169,11 +169,13 @@ describe("compare protocol", () => {
   it("requires sync after delayed host drift in the structured prompt only", () => {
     const structured = byTask(logs, "host_drift", "structured");
     const vision = byTask(logs, "host_drift", "vision");
-    expect(structured.goalText).toBe('Set the title to "Recovered".');
-    expect(structured.goalText).not.toMatch(/outside|drift|changed/i);
-    expect(structured.hostDriftAfterSteps).toBe(3);
+    expect(structured.goalText).toBe('Change the title to "Recovered" and set its fill to #2f6f5f.');
+    expect(structured.goalText).not.toMatch(/outside|drift|\bsync\b/i);
+    expect(structured.hostDriftAfterSteps).toBeUndefined();
     expect(structured.metrics.verdict).toBe("DONE");
     expect(structured.metrics.usedSync).toBe(true);
+    expect(structured.metrics.hostDiverged).toBeGreaterThan(0);
+    expect(structured.checks.every((check) => check.ok)).toBe(true);
     expect(vision.metrics.verdict).toBe("FAILED");
     expect(vision.metrics.hostDiverged).toBeGreaterThan(0);
     expect(vision.metrics.usedSync).toBe(false);

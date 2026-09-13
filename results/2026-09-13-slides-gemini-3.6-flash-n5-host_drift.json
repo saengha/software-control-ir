@@ -1,0 +1,3572 @@
+[
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:17:09.898Z",
+    "finishedAt": "2026-09-13T15:17:20.917Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "name": "scir.transaction",
+          "actions": [
+            {
+              "target": "title_01",
+              "action": "slides__set_text",
+              "value": "Recovered"
+            },
+            {
+              "action": "slides__set_fill",
+              "target": "title_01",
+              "value": "#2f6f5f"
+            }
+          ]
+        },
+        "action": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "latencyMs": 0.81,
+        "observationChars": 179,
+        "observationTokens": 45
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.9,
+        "observationChars": 2024,
+        "observationTokens": 506
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.32,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "action": "sync"
+        },
+        "action": {
+          "action": "sync"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Recovered",
+              "to": "Out of band"
+            }
+          ]
+        },
+        "latencyMs": 0.34,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 3,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Out of band",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.36,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 4,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.fill",
+              "from": "#0f1a14",
+              "to": "#2f6f5f"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#2f6f5f",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.59,
+        "observationChars": 2010,
+        "observationTokens": 503
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 4,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 4,
+      "steps": 6,
+      "latencyMs": 11018.71,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 1,
+      "usedSync": true,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      },
+      {
+        "id": "title_fill",
+        "ok": true,
+        "detail": "#2f6f5f"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 0,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:17:20.917Z",
+    "finishedAt": "2026-09-13T15:17:34.927Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 5.19,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 375,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 375,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.62,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.51,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "right_click",
+          "x": 375,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 375,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.34,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "type",
+          "text": "#2f6f5f"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#2f6f5f",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.74,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 375,
+          "y": 303
+        },
+        "action": {
+          "tool": "click",
+          "x": 375,
+          "y": 303
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.27,
+        "observationChars": 709,
+        "observationTokens": 178
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 375,
+          "y": 303
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 375,
+          "y": 303
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.29,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 14009.57,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      },
+      {
+        "id": "title_fill",
+        "ok": false,
+        "detail": "#0f1a14"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:17:34.927Z",
+    "finishedAt": "2026-09-13T15:17:46.736Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "name": "scir.transaction",
+          "actions": [
+            {
+              "value": "Recovered",
+              "target": "title_01",
+              "action": "slides__set_text",
+              "expectedRevision": 0
+            },
+            {
+              "action": "slides__set_fill",
+              "target": "title_01",
+              "value": "#2f6f5f",
+              "expectedRevision": 0
+            }
+          ]
+        },
+        "action": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "latencyMs": 0.18,
+        "observationChars": 179,
+        "observationTokens": 45
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "name": "scir.describe"
+        },
+        "action": {
+          "adapter": "slides",
+          "domain": "presentation",
+          "capabilities": {
+            "transactions": true,
+            "compensation": true,
+            "snapshotRestore": true,
+            "relevantState": true,
+            "hierarchy": true
+          },
+          "revision": 0,
+          "objectTypes": [
+            "slide",
+            "textbox",
+            "rectangle",
+            "ellipse"
+          ],
+          "operations": {
+            "core": [
+              "select",
+              "set_locked",
+              "delete"
+            ],
+            "domain": [
+              "move",
+              "resize",
+              "create_shape",
+              "set_fill",
+              "set_text",
+              "align",
+              "set_active_slide",
+              "duplicate",
+              "bring_to_front",
+              "send_to_back",
+              "group",
+              "ungroup"
+            ]
+          }
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 0.44,
+        "observationChars": 439,
+        "observationTokens": 110
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.29,
+        "observationChars": 2024,
+        "observationTokens": 506
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.25,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "action": "sync"
+        },
+        "action": {
+          "action": "sync"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Recovered",
+              "to": "Out of band"
+            }
+          ]
+        },
+        "latencyMs": 0.24,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 3,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Out of band",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.39,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 4,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.fill",
+              "from": "#0f1a14",
+              "to": "#2f6f5f"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#2f6f5f",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.49,
+        "observationChars": 2010,
+        "observationTokens": 503
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 4,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 4,
+      "steps": 7,
+      "latencyMs": 11809.33,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 1,
+      "usedSync": true,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      },
+      {
+        "id": "title_fill",
+        "ok": true,
+        "detail": "#2f6f5f"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 1,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:17:46.737Z",
+    "finishedAt": "2026-09-13T15:17:59.753Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.9,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.35,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.23,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "type",
+          "text": "#2f6f5f"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#2f6f5f",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.28,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 3.59,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.31,
+        "observationChars": 709,
+        "observationTokens": 178
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.24,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 13016.52,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      },
+      {
+        "id": "title_fill",
+        "ok": false,
+        "detail": "#0f1a14"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:17:59.753Z",
+    "finishedAt": "2026-09-13T15:18:12.735Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "name": "scir.transaction",
+          "actions": [
+            {
+              "target": "title_01",
+              "value": "Recovered",
+              "action": "slides__set_text"
+            },
+            {
+              "value": "#2f6f5f",
+              "action": "slides__set_fill",
+              "target": "title_01"
+            }
+          ]
+        },
+        "action": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "latencyMs": 0.17,
+        "observationChars": 179,
+        "observationTokens": 45
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "name": "scir.describe"
+        },
+        "action": {
+          "adapter": "slides",
+          "domain": "presentation",
+          "capabilities": {
+            "transactions": true,
+            "compensation": true,
+            "snapshotRestore": true,
+            "relevantState": true,
+            "hierarchy": true
+          },
+          "revision": 0,
+          "objectTypes": [
+            "slide",
+            "textbox",
+            "rectangle",
+            "ellipse"
+          ],
+          "operations": {
+            "core": [
+              "select",
+              "set_locked",
+              "delete"
+            ],
+            "domain": [
+              "move",
+              "resize",
+              "create_shape",
+              "set_fill",
+              "set_text",
+              "align",
+              "set_active_slide",
+              "duplicate",
+              "bring_to_front",
+              "send_to_back",
+              "group",
+              "ungroup"
+            ]
+          }
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 0.14,
+        "observationChars": 439,
+        "observationTokens": 110
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.35,
+        "observationChars": 2024,
+        "observationTokens": 506
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.17,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "action": "sync"
+        },
+        "action": {
+          "action": "sync"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Recovered",
+              "to": "Out of band"
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 3,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Out of band",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.26,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 4,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.fill",
+              "from": "#0f1a14",
+              "to": "#2f6f5f"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#2f6f5f",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.33,
+        "observationChars": 2010,
+        "observationTokens": 503
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 4,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 4,
+      "steps": 7,
+      "latencyMs": 12982.33,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 1,
+      "usedSync": true,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      },
+      {
+        "id": "title_fill",
+        "ok": true,
+        "detail": "#2f6f5f"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 2,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:18:12.735Z",
+    "finishedAt": "2026-09-13T15:18:26.188Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.82,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.31,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.29,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.32,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "type",
+          "text": "#2f6f5f"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#2f6f5f",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.19,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.86,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 709,
+        "observationTokens": 178
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.3,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 13452.53,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      },
+      {
+        "id": "title_fill",
+        "ok": false,
+        "detail": "#0f1a14"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:18:26.188Z",
+    "finishedAt": "2026-09-13T15:18:38.722Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "name": "scir.transaction",
+          "actions": [
+            {
+              "expectedRevision": 0,
+              "target": "title_01",
+              "action": "slides__set_text",
+              "value": "Recovered"
+            },
+            {
+              "target": "title_01",
+              "action": "slides__set_fill",
+              "expectedRevision": 0,
+              "value": "#2f6f5f"
+            }
+          ]
+        },
+        "action": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "latencyMs": 0.17,
+        "observationChars": 179,
+        "observationTokens": 45
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "name": "scir.describe"
+        },
+        "action": {
+          "adapter": "slides",
+          "domain": "presentation",
+          "capabilities": {
+            "transactions": true,
+            "compensation": true,
+            "snapshotRestore": true,
+            "relevantState": true,
+            "hierarchy": true
+          },
+          "revision": 0,
+          "objectTypes": [
+            "slide",
+            "textbox",
+            "rectangle",
+            "ellipse"
+          ],
+          "operations": {
+            "core": [
+              "select",
+              "set_locked",
+              "delete"
+            ],
+            "domain": [
+              "move",
+              "resize",
+              "create_shape",
+              "set_fill",
+              "set_text",
+              "align",
+              "set_active_slide",
+              "duplicate",
+              "bring_to_front",
+              "send_to_back",
+              "group",
+              "ungroup"
+            ]
+          }
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 0.14,
+        "observationChars": 439,
+        "observationTokens": 110
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 2024,
+        "observationTokens": 506
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.17,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "action": "sync"
+        },
+        "action": {
+          "action": "sync"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Recovered",
+              "to": "Out of band"
+            }
+          ]
+        },
+        "latencyMs": 0.21,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 3,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Out of band",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.37,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 4,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.fill",
+              "from": "#0f1a14",
+              "to": "#2f6f5f"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#2f6f5f",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 2010,
+        "observationTokens": 503
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 4,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 4,
+      "steps": 7,
+      "latencyMs": 12533.89,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 1,
+      "usedSync": true,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      },
+      {
+        "id": "title_fill",
+        "ok": true,
+        "detail": "#2f6f5f"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 3,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:18:38.722Z",
+    "finishedAt": "2026-09-13T15:18:52.089Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 2.97,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.29,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.3,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "type",
+          "text": "#2f6f5f"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#2f6f5f",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.19,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.93,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.2,
+        "observationChars": 709,
+        "observationTokens": 178
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.22,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 13366.98,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      },
+      {
+        "id": "title_fill",
+        "ok": false,
+        "detail": "#0f1a14"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "structured",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor through a structured tool API.\nAvailable tools: select, set_locked, delete, move, resize, create_shape, set_fill, set_text, align, set_active_slide, duplicate, bring_to_front, send_to_back, group, ungroup, undo, sync\nEach call returns the resulting state and any validation error.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:18:52.089Z",
+    "finishedAt": "2026-09-13T15:19:04.182Z",
+    "observation": {
+      "kind": "structured",
+      "chars": 2024,
+      "approxTokens": 506,
+      "objectCount": 4
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "name": "scir.transaction",
+          "actions": [
+            {
+              "expectedRevision": 0,
+              "target": "title_01",
+              "value": "Recovered",
+              "action": "slides__set_text"
+            },
+            {
+              "target": "title_01",
+              "action": "slides__set_fill",
+              "value": "#2f6f5f",
+              "expectedRevision": 0
+            }
+          ]
+        },
+        "action": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 0,
+          "effects": [],
+          "rolledBack": false,
+          "issues": [
+            {
+              "code": "unknown_operation",
+              "message": "Operation \"slides__set_text\" is not in the adapter catalog"
+            }
+          ]
+        },
+        "latencyMs": 0.15,
+        "observationChars": 179,
+        "observationTokens": 45
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "name": "scir.describe"
+        },
+        "action": {
+          "adapter": "slides",
+          "domain": "presentation",
+          "capabilities": {
+            "transactions": true,
+            "compensation": true,
+            "snapshotRestore": true,
+            "relevantState": true,
+            "hierarchy": true
+          },
+          "revision": 0,
+          "objectTypes": [
+            "slide",
+            "textbox",
+            "rectangle",
+            "ellipse"
+          ],
+          "operations": {
+            "core": [
+              "select",
+              "set_locked",
+              "delete"
+            ],
+            "domain": [
+              "move",
+              "resize",
+              "create_shape",
+              "set_fill",
+              "set_text",
+              "align",
+              "set_active_slide",
+              "duplicate",
+              "bring_to_front",
+              "send_to_back",
+              "group",
+              "ungroup"
+            ]
+          }
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 0.14,
+        "observationChars": 439,
+        "observationTokens": 110
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 0,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 2024,
+        "observationTokens": 506
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 1,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 1,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.17,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "action": "sync"
+        },
+        "action": {
+          "action": "sync"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Recovered",
+              "to": "Out of band"
+            }
+          ]
+        },
+        "latencyMs": 0.24,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "action": {
+          "action": "set_text",
+          "params": {
+            "value": "Recovered"
+          },
+          "target": "title_01",
+          "expectedRevision": 2,
+          "value": "Recovered"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 3,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Out of band",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Out of band",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.32,
+        "observationChars": 2014,
+        "observationTokens": 504
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "action": {
+          "action": "set_fill",
+          "params": {
+            "value": "#2f6f5f"
+          },
+          "target": "title_01",
+          "expectedRevision": 3,
+          "value": "#2f6f5f"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 4,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.fill",
+              "from": "#0f1a14",
+              "to": "#2f6f5f"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#2f6f5f",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.25,
+        "observationChars": 2010,
+        "observationTokens": 503
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 4,
+      "rejected": 2,
+      "failed": 0,
+      "revisions": 4,
+      "steps": 7,
+      "latencyMs": 12093.21,
+      "goal": true,
+      "observationChars": 2024,
+      "observationTokens": 506,
+      "hostDiverged": 1,
+      "usedSync": true,
+      "usedRecovery": false,
+      "verdict": "DONE"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": true,
+        "detail": "Recovered"
+      },
+      {
+        "id": "title_fill",
+        "ok": true,
+        "detail": "#2f6f5f"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "protocol": "scir-compare-v0",
+    "protocolVersion": 4,
+    "adapter": "slides",
+    "task": "host_drift",
+    "taskCategory": "gated",
+    "policy": "vision",
+    "driver": "live",
+    "runIndex": 4,
+    "goalText": "Change the title to \"Recovered\" and set its fill to #2f6f5f.",
+    "prompt": "You control a slide editor by looking at screenshots and issuing\nmouse/keyboard actions: click(x, y), type(text), scroll(direction),\nright_click(x, y), screenshot().\nYou have no access to object IDs, lock state, or hidden-slide flags —\nonly what is visible in the rendered image and what the UI panels\nshow when you open them.\nGoal: Change the title to \"Recovered\" and set its fill to #2f6f5f.\nYou have 8 steps. Say DONE when the goal is met, or FAILED if you\ncannot proceed.",
+    "maxSteps": 8,
+    "startedAt": "2026-09-13T15:19:04.182Z",
+    "finishedAt": "2026-09-13T15:19:18.026Z",
+    "observation": {
+      "kind": "vision",
+      "chars": 467,
+      "approxTokens": 117,
+      "regionCount": 3,
+      "rasterSha256": "8ff6677a6f2688554be5dbd8d0642897c5e8dae040a4568671f45b30077ae4e4",
+      "rasterWidth": 96,
+      "rasterHeight": 54
+    },
+    "steps": [
+      {
+        "i": 0,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 0,
+          "effects": []
+        },
+        "latencyMs": 3.18,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 1,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 1,
+          "effects": [],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.28,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 2,
+        "proposed": {
+          "tool": "type",
+          "text": "Recovered"
+        },
+        "action": {
+          "tool": "type",
+          "text": "Recovered",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": [
+            {
+              "kind": "update",
+              "target": "title_01",
+              "path": "properties.text",
+              "from": "Quarterly Review",
+              "to": "Recovered"
+            }
+          ],
+          "focus": {
+            "before": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Quarterly Review",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            },
+            "after": {
+              "id": "title_01",
+              "type": "textbox",
+              "parent": "slide_01",
+              "properties": {
+                "locked": false,
+                "fill": "#0f1a14",
+                "text": "Recovered",
+                "x": 80,
+                "y": 70,
+                "width": 800,
+                "height": 90,
+                "z": 1
+              }
+            }
+          }
+        },
+        "latencyMs": 0.28,
+        "observationChars": 666,
+        "observationTokens": 167
+      },
+      {
+        "i": 3,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.24,
+        "observationChars": 661,
+        "observationTokens": 166
+      },
+      {
+        "i": 4,
+        "proposed": {
+          "tool": "type",
+          "text": "#2f6f5f"
+        },
+        "action": {
+          "tool": "type",
+          "text": "#2f6f5f",
+          "mapped": "set_text"
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.2,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 5,
+        "proposed": {
+          "tool": "screenshot"
+        },
+        "action": {
+          "tool": "screenshot"
+        },
+        "result": {
+          "status": "accepted",
+          "revision": 2,
+          "effects": []
+        },
+        "latencyMs": 2.91,
+        "observationChars": 762,
+        "observationTokens": 191
+      },
+      {
+        "i": 6,
+        "proposed": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.23,
+        "observationChars": 709,
+        "observationTokens": 178
+      },
+      {
+        "i": 7,
+        "proposed": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "action": {
+          "tool": "right_click",
+          "x": 450,
+          "y": 153
+        },
+        "result": {
+          "status": "rejected",
+          "revision": 2,
+          "effects": [],
+          "issues": [
+            {
+              "code": "host_diverged",
+              "message": "Host state changed outside this session. Call sync before applying more actions."
+            }
+          ]
+        },
+        "latencyMs": 0.24,
+        "observationChars": 714,
+        "observationTokens": 179
+      }
+    ],
+    "metrics": {
+      "attempts": 6,
+      "accepted": 2,
+      "rejected": 4,
+      "failed": 0,
+      "revisions": 2,
+      "steps": 8,
+      "latencyMs": 13843.9,
+      "goal": false,
+      "observationChars": 467,
+      "observationTokens": 117,
+      "hostDiverged": 4,
+      "usedSync": false,
+      "usedRecovery": false,
+      "verdict": "FAILED"
+    },
+    "checks": [
+      {
+        "id": "title_recovered",
+        "ok": false,
+        "detail": "Out of band"
+      },
+      {
+        "id": "title_fill",
+        "ok": false,
+        "detail": "#0f1a14"
+      }
+    ],
+    "model": "gemini-3.6-flash"
+  }
+]

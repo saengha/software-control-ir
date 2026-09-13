@@ -81,6 +81,12 @@ function captureRaster(
   return renderSlideRaster(state);
 }
 
+export function taskGoalHolds(adapter: Adapter, session: Session, task: CompareTask): boolean {
+  const state = session.snapshot();
+  const raster = captureRaster(adapter, state, task.gradeFromRender === true);
+  return task.goal(state, { raster }).every((check) => check.ok);
+}
+
 export interface CompareRunLog {
   protocol: typeof COMPARE_PROTOCOL.id;
   protocolVersion: typeof COMPARE_PROTOCOL.version;
@@ -148,16 +154,12 @@ export function injectHostIfDue(
   already: boolean,
 ): boolean {
   if (already || !task.inject) return already;
-  const after = task.injectAfterSteps;
-  if (after === undefined) {
-    adapter.execute(normalizeAction({ ...task.inject }), session.snapshot());
-    return true;
-  }
-  if (stepsTaken === after) {
-    adapter.execute(normalizeAction({ ...task.inject }), session.snapshot());
-    return true;
-  }
-  return false;
+  const due = task.injectWhen
+    ? task.injectWhen(session.snapshot())
+    : task.injectAfterSteps === undefined || stepsTaken >= task.injectAfterSteps;
+  if (!due) return false;
+  adapter.execute(normalizeAction({ ...task.inject }), session.snapshot());
+  return true;
 }
 
 export function performCompareStep(
@@ -200,6 +202,40 @@ function usesSync(step: CompareStepLog): boolean {
   return false;
 }
 
+function namesOf(step: CompareStepLog): string[] {
+  const names: string[] = [];
+  for (const value of [step.action, step.proposed]) {
+    if (!isPlain(value)) continue;
+    for (const key of ["action", "name", "tool"] as const) {
+      const name = value[key];
+      if (typeof name === "string") names.push(name);
+    }
+  }
+  return names;
+}
+
+function isHostDriftRetry(step: CompareStepLog): boolean {
+  return namesOf(step).some((name) => name.includes("set_text") || name.includes("set_fill") || name === "type");
+}
+
+function retriedAfterSync(steps: CompareStepLog[]): boolean {
+  let synced = false;
+  for (const step of steps) {
+    if (usesSync(step) && step.result.status === "accepted") {
+      synced = true;
+      continue;
+    }
+    if (synced && step.result.status === "accepted" && isHostDriftRetry(step)) return true;
+  }
+  return false;
+}
+
+function hostDriftRecovered(steps: CompareStepLog[], stateGoal: boolean): boolean {
+  const diverged = steps.some((step) => issueCodes(step.result).includes("host_diverged"));
+  const synced = steps.some((step) => usesSync(step) && step.result.status === "accepted");
+  return stateGoal && diverged && synced && retriedAfterSync(steps);
+}
+
 export function finishCompareLog(input: {
   adapter: Adapter;
   task: CompareTask;
@@ -216,9 +252,10 @@ export function finishCompareLog(input: {
   const finalState = session.snapshot();
   const raster = captureRaster(adapter, finalState, task.gradeFromRender === true);
   const checks = task.goal(finalState, { raster });
-  const goal = checks.every((check) => check.ok);
+  const stateGoal = checks.every((check) => check.ok);
   const codes = steps.flatMap((step) => issueCodes(step.result));
   const counts = session.metrics();
+  const recovered = task.id === "host_drift" ? hostDriftRecovered(steps, stateGoal) : stateGoal;
   const metrics: CompareMetrics = {
     attempts: counts.attempts,
     accepted: counts.accepted,
@@ -227,13 +264,13 @@ export function finishCompareLog(input: {
     revisions: counts.revisions,
     steps: steps.length,
     latencyMs: Math.round((performance.now() - started) * 100) / 100,
-    goal,
+    goal: recovered,
     observationChars: observation.chars,
     observationTokens: observation.approxTokens,
     hostDiverged: codes.filter((code) => code === "host_diverged").length,
     usedSync: steps.some((step) => usesSync(step)),
     usedRecovery: steps.some((step) => step.result.recovery !== undefined),
-    verdict: goal ? "DONE" : "FAILED",
+    verdict: recovered ? "DONE" : "FAILED",
   };
 
   const log: CompareRunLog = {
