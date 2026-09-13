@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Software Control IR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="mast">
+        <div>
+          <p class="kicker">Experimental / v0</p>
+          <h1>Software Control IR</h1>
+          <p class="lede">Software already knows what it is. AI shouldn't have to figure it out from a screenshot.</p>
+        </div>
+        <div class="rev-meter" aria-live="polite">
+          <span class="label">Revision</span>
+          <strong id="revision">0</strong>
+        </div>
+      </header>
+
+      <main class="stage">
+        <section class="panel pixel">
+          <div class="panel-head">
+            <span>Pixel space</span>
+            <span class="hint">what a vision agent would see</span>
+          </div>
+          <canvas id="scene" width="840" height="420"></canvas>
+          <p class="caption">Drag unlocked objects. Clicks become <code>select</code>. Drops become <code>move</code>.</p>
+        </section>
+
+        <section class="panel structure">
+          <div class="panel-head">
+            <span>Structured state</span>
+            <span class="hint">what the IR exposes</span>
+          </div>
+          <pre id="state"></pre>
+        </section>
+      </main>
+
+      <section class="lower">
+        <div class="panel">
+          <div class="panel-head">
+            <span>Action</span>
+            <span class="hint">validate → execute → effect</span>
+          </div>
+          <div class="composer">
+            <label>
+              Operation
+              <select id="op"></select>
+            </label>
+            <label>
+              Target
+              <select id="target"></select>
+            </label>
+            <label id="param-wrap">
+              <span id="param-name">Param</span>
+              <input id="param" />
+            </label>
+            <button id="apply" type="button">Apply</button>
+          </div>
+          <textarea id="raw" spellcheck="false"></textarea>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span>Result</span>
+            <span class="hint" id="result-status">idle</span>
+          </div>
+          <pre id="result"></pre>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span>Revisions</span>
+            <span class="hint">click to rollback</span>
+          </div>
+          <ol id="history"></ol>
+          <button id="reset" type="button">Rollback to 0</button>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

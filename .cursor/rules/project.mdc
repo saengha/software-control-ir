@@ -1,0 +1,8 @@
+---
+description: Software Control IR design principles
+alwaysApply: true
+---
+
+This project explores a semantic intermediate representation for AI-controlled software.
+
+Keep the common core small. Put application-specific operations in adapters. Validate before mutating. Report effects, revisions, and rollback when possible. Do not treat this IR as a replacement for MCP, OpenAPI, or native APIs. Do not grow a universal command language. Earn abstractions with working adapters and measurements.
