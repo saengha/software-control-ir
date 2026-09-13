@@ -45,6 +45,14 @@ function checkParam(name: string, spec: ParamSpec, value: unknown): ValidationIs
     };
   }
 
+  if (spec.enum && typeof value === "string" && !spec.enum.includes(value)) {
+    return {
+      code: "invalid_params",
+      message: `Param "${name}" must be one of ${spec.enum.join(", ")}`,
+      path: name,
+    };
+  }
+
   if (spec.type === "number" && typeof value === "number") {
     if (spec.minimum !== undefined && value < spec.minimum) {
       return {
@@ -128,6 +136,14 @@ export function validateAction(
       code: "locked",
       message: `Target "${target.id}" is locked`,
       path: "properties.locked",
+    });
+  }
+
+  if (action.action === "delete" && action.target && state.objects.some((object) => object.parent === action.target)) {
+    issues.push({
+      code: "has_children",
+      message: `Cannot delete "${action.target}" while it still has children`,
+      path: "target",
     });
   }
 

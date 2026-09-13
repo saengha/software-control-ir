@@ -8,8 +8,14 @@ export interface ConformanceCheck {
   detail: string;
 }
 
+function sameObjects(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export function runConformance(adapter: Adapter): ConformanceCheck[] {
   const checks: ConformanceCheck[] = [];
+  // Fixtures are not required to be idempotent, so every section starts here.
+  const initial = cloneJson(adapter.snapshot());
   const session = new Session(adapter);
   const fixtures = adapter.fixtures();
   const before = cloneJson(session.snapshot());
@@ -18,11 +24,12 @@ export function runConformance(adapter: Adapter): ConformanceCheck[] {
   checks.push({
     id: "rejects_invalid_action",
     ok: invalid.status === "rejected" && invalid.revision === before.revision,
-    detail: invalid.status === "rejected" ? (invalid.issues ?? []).map((issue) => issue.code).join(", ") : invalid.status,
+    detail:
+      invalid.status === "rejected" ? (invalid.issues ?? []).map((issue) => issue.code).join(", ") : invalid.status,
   });
   checks.push({
     id: "invalid_action_does_not_mutate",
-    ok: JSON.stringify(session.snapshot().objects) === JSON.stringify(before.objects),
+    ok: sameObjects(session.snapshot().objects, before.objects),
     detail: "state after rejected action",
   });
 
@@ -58,10 +65,83 @@ export function runConformance(adapter: Adapter): ConformanceCheck[] {
     id: "restores_previous_state",
     ok:
       rolled.status === "accepted" &&
-      JSON.stringify(session.snapshot().objects) === JSON.stringify(before.objects) &&
+      sameObjects(session.snapshot().objects, before.objects) &&
       session.snapshot().revision === before.revision,
     detail: `revision ${session.snapshot().revision}`,
   });
 
+  adapter.restore(cloneJson(initial));
+  checks.push(...describeChecks(adapter));
+
+  adapter.restore(cloneJson(initial));
+  checks.push(...batchChecks(adapter));
+
+  adapter.restore(cloneJson(initial));
+  checks.push(...undoChecks(adapter));
+
   return checks;
+}
+
+function describeChecks(adapter: Adapter): ConformanceCheck[] {
+  const session = new Session(adapter);
+  const description = session.describe();
+  return [
+    {
+      id: "describes_itself",
+      ok:
+        description.adapter.length > 0 &&
+        description.objectTypes.length > 0 &&
+        description.operations.core.length > 0,
+      detail: `${description.objectTypes.length} types, ${description.operations.domain.length} domain ops`,
+    },
+  ];
+}
+
+function batchChecks(adapter: Adapter): ConformanceCheck[] {
+  const session = new Session(adapter);
+  const fixtures = adapter.fixtures();
+  const before = cloneJson(session.snapshot());
+
+  const aborted = session.transaction([fixtures.validAction, fixtures.invalidAction]);
+  const checks: ConformanceCheck[] = [
+    {
+      id: "aborted_batch_leaves_no_changes",
+      ok:
+        aborted.status !== "accepted" &&
+        sameObjects(session.snapshot().objects, before.objects) &&
+        session.snapshot().revision === before.revision,
+      detail: `${aborted.status}, rolledBack=${aborted.rolledBack}`,
+    },
+  ];
+
+  const committed = session.transaction([fixtures.validAction]);
+  checks.push({
+    id: "committed_batch_reports_effects",
+    ok: committed.status === "accepted" && committed.effects.length > 0,
+    detail: `${committed.effects.length} effects`,
+  });
+
+  return checks;
+}
+
+function undoChecks(adapter: Adapter): ConformanceCheck[] {
+  const session = new Session(adapter);
+  const fixtures = adapter.fixtures();
+  const before = cloneJson(session.snapshot());
+
+  session.apply(fixtures.validAction);
+  const undone = session.undo();
+
+  return [
+    {
+      id: "undo_restores_previous_state",
+      ok: undone.status === "accepted" && sameObjects(session.snapshot().objects, before.objects),
+      detail: `${undone.status} via ${undone.recovery ?? "none"}`,
+    },
+    {
+      id: "undo_reports_mechanism",
+      ok: undone.recovery === "compensation" || undone.recovery === "snapshot",
+      detail: undone.recovery ?? "none",
+    },
+  ];
 }

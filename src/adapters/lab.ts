@@ -1,13 +1,7 @@
-import type {
-  Action,
-  AdapterState,
-  Operation,
-  ScirObject,
-  State,
-  StateQuery,
-  ValidationIssue,
-} from "../ir/types.js";
+import type { Action, AdapterState, Operation, ScirObject, State, StateQuery, ValidationIssue } from "../ir/types.js";
+import { coreOperations } from "../ir/core-ops.js";
 import { cloneJson } from "../ir/normalize.js";
+import { matchQuery } from "../ir/query.js";
 import type { Adapter } from "../runtime/adapter.js";
 
 function asNumberPair(value: unknown): [number, number] | undefined {
@@ -22,16 +16,10 @@ function asNumberPair(value: unknown): [number, number] | undefined {
   return undefined;
 }
 
-function matchQuery(object: ScirObject, query?: StateQuery): boolean {
-  if (!query) return true;
-  if (query.ids && !query.ids.includes(object.id)) return false;
-  if (query.types && !query.types.includes(object.type)) return false;
-  return true;
-}
-
-const catalog: Operation[] = [
+const domainOperations: Operation[] = [
   {
     name: "set_temperature",
+    layer: "domain",
     description: "Set a heater temperature in Celsius.",
     target: { required: true, types: ["heater"] },
     params: { value: { type: "number", required: true, minimum: 0, maximum: 400 } },
@@ -39,6 +27,7 @@ const catalog: Operation[] = [
   },
   {
     name: "set_level",
+    layer: "domain",
     description: "Set a vessel fill level as a percentage.",
     target: { required: true, types: ["vessel"] },
     params: { value: { type: "number", required: true, minimum: 0, maximum: 100 } },
@@ -46,6 +35,7 @@ const catalog: Operation[] = [
   },
   {
     name: "move",
+    layer: "domain",
     description: "Move an object to a new position.",
     target: { required: true },
     params: {
@@ -55,37 +45,16 @@ const catalog: Operation[] = [
     reversible: true,
   },
   {
-    name: "set_locked",
-    description: "Lock or unlock an object.",
-    target: { required: true },
-    params: { value: { type: "boolean", required: true } },
-    appliesWhenLocked: true,
-    reversible: true,
-  },
-  {
-    name: "select",
-    description: "Select an object. Pass no target to clear selection.",
-    target: { required: false },
-    params: {},
-    appliesWhenLocked: true,
-    reversible: true,
-  },
-  {
     name: "create",
-    description: "Create an object in the lab scene.",
+    layer: "domain",
+    description: "Create a heater or vessel in the lab scene.",
     target: { required: false },
     params: {
       id: { type: "string", required: true },
-      type: { type: "string", required: true },
+      type: { type: "string", required: true, enum: ["heater", "vessel"] },
       x: { type: "number", required: true },
       y: { type: "number", required: true },
     },
-    reversible: true,
-  },
-  {
-    name: "delete",
-    description: "Delete an object.",
-    target: { required: true },
     reversible: true,
   },
 ];
@@ -116,7 +85,7 @@ function defaultObjects(): ScirObject[] {
       properties: {
         level: 40,
         locked: false,
-        position: [600, 170],
+        position: [560, 170],
       },
     },
   ];
@@ -134,7 +103,7 @@ export class LabAdapter implements Adapter {
   }
 
   catalog(): Operation[] {
-    return cloneJson(catalog);
+    return [...coreOperations(), ...cloneJson(domainOperations)];
   }
 
   snapshot(query?: StateQuery): AdapterState {
@@ -162,14 +131,6 @@ export class LabAdapter implements Adapter {
   check(action: Action, state: State): ValidationIssue[] {
     if (action.action !== "create") return [];
     const issues: ValidationIssue[] = [];
-    const type = action.params.type;
-    if (type !== "heater" && type !== "vessel") {
-      issues.push({
-        code: "type_mismatch",
-        message: `Lab adapter supports heater and vessel, not "${String(type)}"`,
-        path: "type",
-      });
-    }
     if (typeof action.params.id === "string" && state.objects.some((object) => object.id === action.params.id)) {
       issues.push({
         code: "duplicate_target",
@@ -178,6 +139,42 @@ export class LabAdapter implements Adapter {
       });
     }
     return issues;
+  }
+
+  inverse(action: Action, before: State): Action | undefined {
+    const target = action.target;
+    const object = target ? before.objects.find((item) => item.id === target) : undefined;
+
+    switch (action.action) {
+      case "set_temperature":
+        return object && target
+          ? { action: "set_temperature", target, params: { value: object.properties.temperature ?? 0 } }
+          : undefined;
+      case "set_level":
+        return object && target
+          ? { action: "set_level", target, params: { value: object.properties.level ?? 0 } }
+          : undefined;
+      case "set_locked":
+        return object && target
+          ? { action: "set_locked", target, params: { value: object.properties.locked ?? false } }
+          : undefined;
+      case "move": {
+        if (!object || !target) return undefined;
+        const [x, y] = positionOf(object);
+        return { action: "move", target, params: { x, y } };
+      }
+      case "create": {
+        const id = action.params.id;
+        return typeof id === "string" ? { action: "delete", target: id, params: {} } : undefined;
+      }
+      case "select": {
+        const previous = before.selection[0];
+        return previous ? { action: "select", target: previous, params: {} } : { action: "select", params: {} };
+      }
+      default:
+        // delete cannot be rebuilt from a single lab action.
+        return undefined;
+    }
   }
 
   restore(state: AdapterState): void {
@@ -230,12 +227,6 @@ export class LabAdapter implements Adapter {
     const type = action.params.type;
     if (typeof id !== "string" || typeof type !== "string") {
       throw new Error("create requires id and type");
-    }
-    if (this.objects.some((object) => object.id === id)) {
-      throw new Error(`Object "${id}" already exists`);
-    }
-    if (type !== "heater" && type !== "vessel") {
-      throw new Error(`Unsupported type "${type}"`);
     }
     const x = action.params.x;
     const y = action.params.y;

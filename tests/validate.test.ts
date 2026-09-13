@@ -32,4 +32,14 @@ describe("action normalization and validation", () => {
     expect(result.status).toBe("rejected");
     expect(result.issues?.some((issue) => issue.code === "duplicate_target")).toBe(true);
   });
+
+  it("rejects an enum value that the catalog does not allow", () => {
+    const session = new Session(new LabAdapter());
+    const result = session.apply({
+      action: "create",
+      params: { id: "pump_01", type: "pump", x: 20, y: 20 },
+    });
+    expect(result.status).toBe("rejected");
+    expect(result.issues?.some((issue) => issue.code === "invalid_params")).toBe(true);
+  });
 });

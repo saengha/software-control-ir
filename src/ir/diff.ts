@@ -30,6 +30,15 @@ export function diffStates(before: State, after: State): Effect[] {
         to: next.type,
       });
     }
+    if (previous.parent !== next.parent) {
+      effects.push({
+        kind: "update",
+        target: id,
+        path: "parent",
+        from: previous.parent ?? null,
+        to: next.parent ?? null,
+      });
+    }
     const keys = new Set([...Object.keys(previous.properties), ...Object.keys(next.properties)]);
     for (const key of keys) {
       const from = previous.properties[key];

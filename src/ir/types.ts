@@ -11,6 +11,7 @@ export type ObjectId = string;
 export interface ScirObject {
   id: ObjectId;
   type: string;
+  parent?: ObjectId;
   properties: Record<string, Json>;
 }
 
@@ -55,6 +56,7 @@ export interface ParamSpec {
   required?: boolean;
   minimum?: number;
   maximum?: number;
+  enum?: string[];
 }
 
 export interface TargetSpec {
@@ -62,9 +64,12 @@ export interface TargetSpec {
   types?: string[];
 }
 
+export type OperationLayer = "core" | "domain";
+
 export interface Operation {
   name: string;
   description: string;
+  layer: OperationLayer;
   target?: TargetSpec;
   params?: Record<string, ParamSpec>;
   preconditions?: Precondition[];
@@ -95,6 +100,8 @@ export interface ActionFocus {
   after?: ScirObject;
 }
 
+export type RecoveryMechanism = "compensation" | "snapshot";
+
 export interface ActionResult {
   status: ResultStatus;
   action: Action;
@@ -104,6 +111,28 @@ export interface ActionResult {
   effects: Effect[];
   issues?: ValidationIssue[];
   focus?: ActionFocus;
+  recovery?: RecoveryMechanism;
+}
+
+/** What an agent sees without paying for two full state copies. */
+export interface CompactResult {
+  status: ResultStatus;
+  revision: number;
+  effects: Effect[];
+  issues?: ValidationIssue[];
+  focus?: ActionFocus;
+  recovery?: RecoveryMechanism;
+}
+
+export interface TransactionResult {
+  status: ResultStatus;
+  revision: number;
+  before: State;
+  after: State;
+  effects: Effect[];
+  results: ActionResult[];
+  rolledBack: boolean;
+  issues?: ValidationIssue[];
 }
 
 export interface RevisionRecord {
@@ -116,8 +145,54 @@ export interface RevisionRecord {
 export interface StateQuery {
   ids?: ObjectId[];
   types?: string[];
+  parent?: ObjectId;
 }
 
 export interface ExecuteOutcome {
   effects?: Effect[];
+}
+
+export interface AttemptRecord {
+  status: ResultStatus;
+  action: Action;
+  revision: number;
+  issues?: ValidationIssue[];
+}
+
+export interface RunMetrics {
+  attempts: number;
+  accepted: number;
+  rejected: number;
+  failed: number;
+  revisions: number;
+  latencyMs?: number;
+  goal?: boolean;
+}
+
+export interface Trace {
+  adapter: string;
+  domain: string;
+  actions: Action[];
+}
+
+export interface StateSize {
+  objects: number;
+  chars: number;
+  approxTokens: number;
+}
+
+export interface Capabilities {
+  transactions: boolean;
+  compensation: boolean;
+  relevantState: boolean;
+  hierarchy: boolean;
+}
+
+export interface AdapterDescription {
+  adapter: string;
+  domain: string;
+  capabilities: Capabilities;
+  revision: number;
+  objectTypes: string[];
+  operations: { core: string[]; domain: string[] };
 }

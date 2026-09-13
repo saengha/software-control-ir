@@ -12,6 +12,7 @@
       "properties": {
         "id": { "$ref": "#/$defs/objectId" },
         "type": { "type": "string", "minLength": 1 },
+        "parent": { "$ref": "#/$defs/objectId" },
         "properties": { "type": "object", "additionalProperties": true }
       },
       "additionalProperties": false
@@ -70,6 +71,7 @@
         "after": { "$ref": "#/$defs/state" },
         "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
         "issues": { "type": "array", "items": { "$ref": "#/$defs/issue" } },
+        "recovery": { "enum": ["compensation", "snapshot"] },
         "focus": {
           "type": "object",
           "properties": {
@@ -78,6 +80,34 @@
           },
           "additionalProperties": false
         }
+      },
+      "additionalProperties": false
+    },
+    "transaction": {
+      "description": "A batch that either lands completely or leaves no changes behind.",
+      "type": "object",
+      "required": ["status", "revision", "before", "after", "effects", "results", "rolledBack"],
+      "properties": {
+        "status": { "enum": ["accepted", "rejected", "failed"] },
+        "revision": { "type": "integer", "minimum": 0 },
+        "before": { "$ref": "#/$defs/state" },
+        "after": { "$ref": "#/$defs/state" },
+        "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "results": { "type": "array", "items": { "$ref": "#/$defs/result" } },
+        "rolledBack": { "type": "boolean" },
+        "issues": { "type": "array", "items": { "$ref": "#/$defs/issue" } }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "description": "What an adapter can do, so an agent does not have to probe for it.",
+      "type": "object",
+      "required": ["transactions", "compensation", "relevantState", "hierarchy"],
+      "properties": {
+        "transactions": { "type": "boolean" },
+        "compensation": { "type": "boolean" },
+        "relevantState": { "type": "boolean" },
+        "hierarchy": { "type": "boolean" }
       },
       "additionalProperties": false
     }
