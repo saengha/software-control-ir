@@ -1,0 +1,20 @@
+{
+  "protocol": "scir-compare-v0",
+  "protocolVersion": 4,
+  "driver": "live",
+  "adapter": "impress",
+  "host": "libreoffice-impress",
+  "synthetic": false,
+  "visionChrome": "synthetic",
+  "contrastGrader": "ir-canvas-raster",
+  "documentState": "uno-snapshot",
+  "os": "win32 10.0.26100",
+  "libreoffice": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+  "fixture": "C:\\Users\\JHH\\software control IR\\fixtures\\impress\\board.odp",
+  "contrastFixture": "C:\\Users\\JHH\\software control IR\\fixtures\\impress\\contrast.odp",
+  "git": "318e1743e135723f9be9ebff83a2973719685ac8",
+  "model": "gemini-3.6-flash",
+  "repeats": 5,
+  "tasks": "all",
+  "when": "2026-09-15T11:42:00.581Z"
+}

@@ -47,6 +47,21 @@ export {
   libreOfficeProgram,
 } from "./adapters/impress.js";
 export type { ImpressAdapterOptions, ImpressIsolation } from "./adapters/impress.js";
+export {
+  BlenderAdapter,
+  blenderProgram,
+  copyBlenderDocument,
+  defaultBlenderDocument,
+} from "./adapters/blender.js";
+export type { BlenderAdapterOptions } from "./adapters/blender.js";
+export {
+  KritaAdapter,
+  copyKritaDocument,
+  defaultKritaDocument,
+  kritaProgram,
+  kritaRunnerProgram,
+} from "./adapters/krita.js";
+export type { KritaAdapterOptions } from "./adapters/krita.js";
 export { formatAgentView } from "./agent-view.js";
 export { runConformance } from "./conformance/suite.js";
 export { runDefaultBench } from "./bench/report.js";
@@ -73,6 +88,7 @@ export {
   createAnthropicClient,
   createGeminiClient,
   createLiveClient,
+  createOpenAiClient,
   createReplayClient,
   encodePpm,
   fillComparePrompt,
@@ -99,11 +115,14 @@ export {
   runSlidesCompare,
   runSlidesCompareLive,
   sampleStdev,
+  toAnthropicMessages,
   toGeminiContents,
   geminiContentsIncludeHostDiverged,
+  toOpenAiMessages,
   visionJsonContainsSecrets,
   visionToolFeedback,
   withBackoff,
+  wireToolName,
 } from "./bench/compare/index.js";
 export { runHostDivergedProbe, formatHostDivergedProbe } from "./bench/compare/probe-diverged.js";
 export type { HostDivergedProbeLog, ProbeTurn } from "./bench/compare/probe-diverged.js";

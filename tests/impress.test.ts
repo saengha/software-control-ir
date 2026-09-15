@@ -87,6 +87,19 @@ describe.skipIf(!ready)("LibreOffice Impress", () => {
     expect(object(session, "title_01")?.properties.text).toBe("From UNO");
   }, 60_000);
 
+  it("smoke: set_text is visible in a fresh UNO snapshot, not only in ActionResult", () => {
+    const before = adapter.snapshot().objects.find((item) => item.id === "title_01")?.properties.text;
+    expect(before).toBe("Quarterly Review");
+
+    const session = new Session(adapter);
+    const result = session.apply({ action: "set_text", target: "title_01", value: "Host smoke" });
+    expect(result.status).toBe("accepted");
+
+    const host = adapter.snapshot().objects.find((item) => item.id === "title_01")?.properties.text;
+    expect(host).toBe("Host smoke");
+    expect(host).not.toBe(before);
+  }, 60_000);
+
   it("rejects a fill on a locked shape before UNO mutates", () => {
     const session = new Session(adapter);
     const result = session.apply({ action: "set_fill", target: "logo_01", value: "#ff0000" });

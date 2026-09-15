@@ -2,685 +2,277 @@
 
 Software already knows what it is. AI shouldn't have to figure it out from a screenshot.
 
-An experimental project exploring a semantic intermediate representation (IR) for AI-controlled software.
+An experimental semantic intermediate representation for AI-controlled software. Not a standard, not an MCP replacement, not a universal command language.
 
-The idea is simple:
+The question:
 
-> Can we give AI agents a structured representation of software state and operations, instead of making them reconstruct everything from pixels or application-specific code?
+> Can a small semantic layer make AI-controlled software more predictable, inspectable, and recoverable than screenshots or unrestricted application-specific code?
 
-This project is an attempt to find out.
+This repository measures that question against a frozen protocol (`scir-compare-v0` **v4**) and against a live LibreOffice Impress process.
 
-## Why?
+## 1. Problem
 
-AI agents can already interact with software in several ways:
+Agents already drive software in two common ways:
 
 ```
 Screenshot → Vision → Mouse / Keyboard
 ```
 
-or:
-
 ```
 LLM → Code → Application API
 ```
 
-Both approaches are useful, but they share a common cost:
+Both work. Both spend inference on facts the application already knows: which objects exist, which one is the target, whether it is locked, what changed, whether the call succeeded.
 
-The model often has to perform high-level inference to reconstruct state, understand what changed, and decide how an operation should be expressed — even when the underlying operation itself is mechanically simple.
+That cost is not only tokens. It is another chance to be wrong, and another opaque trace when something goes wrong.
 
-For example, a screenshot may contain everything an agent needs to identify an object, but the model still has to infer:
+## 2. Software Control IR
 
-- What objects exist
-- Which object is the target
-- Its exact properties
-- Whether it is locked or editable
-- What changed after an operation
-- Whether the operation actually succeeded
-
-Likewise, when using an application API, the model may need to reason through application-specific APIs and code before it can perform a relatively simple operation.
-
-That inference has a cost.
-
-Every screenshot interpreted, every API behavior reasoned about, and every verification step consumes computation and introduces another opportunity for error.
-
-The cost can therefore depend not only on what the software is doing, but also on how much the model has to figure out before it can do it.
-
-## A different approach
-
-A structured IR could shift some of that work from inference to explicit representation.
-
-Instead of asking the model to reconstruct the current state and improvise an operation:
-
-```
-Screenshot
-    ↓
-Vision
-    ↓
-Inference
-    ↓
-Mouse / Keyboard
-```
-
-the application could expose structured state:
+The application exposes structured state. The agent selects a structured action. An adapter translates to the native API.
 
 ```
 Application
     ↓
-Structured State
+Structured state
     ↓
 Software Control IR
     ↓
-AI Agent
+AI agent
     ↓
-Structured Action
-    ↓
-Application
-```
-
-For example:
-
-```json
-{
-  "action": "set_temperature",
-  "target": "heater_01",
-  "value": 150
-}
-```
-
-The model is not asked to discover what `heater_01` is from pixels. It is given a structured state and asked to select a precise operation against that state.
-
-This plays to a useful property of language models:
-
-Selecting and composing well-defined operations can be simpler than reconstructing the meaning of an application from incomplete observations.
-
-If this works, two things may follow:
-
-1. **Less inference.** The model may spend less effort reasoning about what the current state actually is. This could potentially reduce token usage, invalid actions, unnecessary tool calls, state-related errors, and execution latency.
-2. **More observable actions.** If operations are represented as discrete structured actions, each step can potentially be inspected, validated, recorded, and reversed.
-
-Instead of treating an automation session as one opaque sequence:
-
-```
-Run everything
-     ↓
-Something went wrong
-     ↓
-Undo / Start over
-```
-
-the system could represent changes as revisions:
-
-```
-Revision 41
-    ↓
-Action A
-    ↓
-Revision 42
-    ↓
-Action B
-    ↓
-Revision 43
-```
-
-This could make individual operations easier to inspect or recover from.
-
-Whether these advantages actually exist — and how large they are — is something this project needs to measure rather than assume.
-
-## The core idea
-
-The project explores a small set of concepts for representing software control:
-
-```
-State
-  ↓
-Action
-  ↓
-Precondition
-  ↓
-Validation
-  ↓
-Effect
-  ↓
-Revision
-  ↓
-Rollback
-```
-
-These concepts are intentionally simple at this stage.
-
-The goal is not to define every possible operation that software might support. Instead, the project is exploring whether a small semantic layer can make certain AI-driven operations easier to understand, validate, and recover from.
-
-## What is an IR?
-
-IR stands for Intermediate Representation.
-
-Compilers provide a useful analogy:
-
-```
-High-level language
-        ↓
-       IR
-        ↓
-Machine code
-```
-
-This project explores a similar idea for software control:
-
-```
-AI Agent
-    ↓
-Software Control IR
-    ↓
-Application Adapter
-    ↓
-Existing Software
-```
-
-The IR is not intended to replace an application's existing API. Instead, an adapter can translate between the application's native model and the semantic representation exposed to the AI.
-
-## State
-
-The first part of the model is State.
-
-An application may already know information such as object IDs, positions, dimensions, values, selection state, lock state, relationships, and current configuration.
-
-Instead of asking an AI to infer these from pixels, an adapter could expose the relevant information directly.
-
-```json
-{
-  "id": "heater_01",
-  "type": "heater",
-  "position": [120, 80],
-  "temperature": 120,
-  "locked": false
-}
-```
-
-The important word here is **relevant**.
-
-The goal is not necessarily to expose the entire application state. A useful adapter may instead provide the minimum state needed for the current task.
-
-## Actions
-
-An Action describes what the AI wants to change.
-
-```json
-{
-  "action": "set_temperature",
-  "target": "heater_01",
-  "value": 150
-}
-```
-
-The adapter can translate this into whatever native operation the application actually uses.
-
-The AI-facing representation does not need to know whether the application internally uses Python, JavaScript, C++, a document format, a plugin API, an RPC interface, or something else. That complexity can remain inside the adapter.
-
-## Validation
-
-An action can potentially be checked before it modifies the application.
-
-```
-Target exists?
-       ↓
-Operation supported?
-       ↓
-Value valid?
-       ↓
-Preconditions satisfied?
-       ↓
-Execute
-```
-
-An invalid action could therefore be rejected before it changes the application. This is one of the main ideas the project wants to investigate.
-
-## Effects and results
-
-After an action is executed, the application should ideally provide structured information about the result.
-
-```
-Before
-  temperature = 120
-
-Action
-  set_temperature(150)
-
-After
-  temperature = 150
-```
-
-This creates a clearer relationship between `State → Action → Resulting State` rather than requiring the AI to determine the result indirectly from another screenshot or by guessing what an API call did.
-
-## Revisions and rollback
-
-Changes can also be represented as revisions.
-
-```
-Revision 41
-    ↓
-Set temperature to 150
-    ↓
-Revision 42
-    ↓
-Move object
-    ↓
-Revision 43
-```
-
-If the underlying application supports it, an adapter could provide a way to restore an earlier revision.
-
-This does not assume that every application has perfect undo support. Rollback may need to be implemented differently depending on the application.
-
-Two mechanisms are implemented, and a result says which one was used:
-
-```
-compensation
-    → apply an inverse action, history moves forward
-      set_text("Board Update")  →  set_text("Quarterly Review")
-
-snapshot
-    → restore a recorded state, history moves back
-      used when the adapter can overwrite the host document
-```
-
-Compensation is the one that could survive contact with real software, where the IR does not own the document and cannot simply overwrite it. Snapshot restore is advertised only when the adapter says it can. An in-memory adapter can offer both. A host-owned wrapper around the same lab scene refuses rollback, undoes with inverse actions, and says `dirty_state` when a batch prefix cannot be inverted.
-
-A host can also change out of band. The session then rejects further actions with `host_diverged` until `sync` acknowledges the new state. An action may include `expectedRevision` so a stale agent is rejected instead of overwriting a newer document.
-
-A batch either lands completely or leaves no changes behind:
-
-```
-move      accepted
-set_locked accepted
-set_fill  rejected  (invalid color)
-    ↓
-revision unchanged, both accepted actions reverted
-```
-
-Later actions can depend on earlier effects, so a batch is validated one action at a time and an already-applied prefix is reverted rather than prevented.
-
-The goal is simply to explore whether explicit revisions can make AI-driven changes easier to inspect and recover from.
-
-## Adapters
-
-An adapter connects the semantic IR to an existing application.
-
-```
-Software Control IR
-        ↓
-      Adapter
-        ↓
-Existing Application
-```
-
-The adapter has an important job:
-
-```
-Native Application State
-        ↓
-Semantic Mapping
-        ↓
-Software Control IR
-        ↓
-Validation
-        ↓
-Native Operation
-```
-
-This is likely to be one of the hardest parts of the project.
-
-Different applications often represent similar concepts in completely different ways. For example, resize might mean changing an object's scale in Blender, changing a bounding box in PowerPoint, or modifying a parametric constraint in CAD.
-
-Because of this, the project does not assume that every application should use exactly the same commands.
-
-The current direction is:
-
-```
-Small Common Core
-        +
-Domain-Specific Extensions
-```
-
-rather than trying to force every application into one universal vocabulary.
-
-## Accessibility trees
-
-Accessibility APIs already provide a structured representation of many user-interface elements.
-
-```
-Window
- ├── Button "Save"
- ├── TextBox "Name"
- └── CheckBox "Enabled"
-```
-
-This is valuable and can potentially be one source of information for an adapter.
-
-A rough distinction explored by this project is:
-
-```
-Vision
-    → What is visible?
-
-Accessibility Tree
-    → What can the user interact with?
-
-Software Control IR
-    → What meaningful state and operations does the software expose?
-```
-
-These approaches are complementary. An adapter could potentially use accessibility information together with native application state, document data, or application APIs.
-
-## How is this different from MCP?
-
-MCP is useful for connecting AI systems with tools and resources. This project is exploring a different layer.
-
-A possible architecture is:
-
-```
-AI Agent
-    ↓
-MCP
-    ↓
-Software Control IR
+Structured action
     ↓
 Adapter
     ↓
 Application
 ```
 
-MCP can provide the mechanism through which an AI discovers and calls tools. The IR is concerned with how the software's semantic state, actions, validation, and results are represented.
+The model is not asked to discover `title_01` from pixels. It is given a state and asked to pick an operation against that state.
 
-The project does not attempt to replace MCP. MCP could be one way to expose or transport the IR.
+This is an intermediate layer, not a product surface. MCP, OpenAPI, and native APIs can still carry or implement it. Domain operations stay on adapters. The common core is `select`, `set_locked`, and `delete`.
 
-To check that this is actually true rather than assumed, an adapter catalog can be projected as typed tool descriptors:
-
-```
-slides.create_shape   required: kind, x, y, width, height
-slides.group          required: ids
-scir.sync             required: -
-scir.transaction      required: actions
-scir.undo             required: -
-```
-
-The projection is mechanical, so the IR stays the single source of validation and state. Tool results are deliberately compact: an agent that already holds the state does not need two more copies of it returned to it.
-
-## How is this different from OpenAPI or JSON-RPC?
-
-OpenAPI and JSON-RPC are useful for describing and calling APIs. This project is interested in questions that can exist above that level:
-
-- What state does this operation act on?
-- What must be true before it runs?
-- What changes after it runs?
-- What was the resulting state?
-- Can the change be represented as a revision?
-- Can the operation be reversed?
-
-An adapter could still use OpenAPI, JSON-RPC, or an application's native API underneath. The IR is not intended to replace those technologies.
-
-## Native code agents
-
-Another important alternative is direct code execution. An AI agent can often write something like `application.do_something(...)`.
-
-This approach is extremely powerful. It provides a level of flexibility that a constrained IR may not.
-
-Software Control IR is therefore not intended to replace code agents. The hypothesis is narrower:
-
-A constrained semantic interface may make some operations easier to validate, inspect, and recover from.
-
-A code agent can potentially do almost anything the application allows. An IR may intentionally do less, in exchange for a more predictable operation surface.
-
-Whether that trade-off is useful is something the project needs to test.
-
-## Related work
-
-This project is not starting from zero. There are already related ideas and projects in several nearby areas.
-
-- **Tarsier** — open-source project from Reworkd focused on helping agents understand and interact with webpages using structured representations such as tagged interactable elements and OCR-derived information. It is primarily focused on web perception and interaction, rather than a general semantic state/action model for arbitrary software.
-- **Manifesto** — explores explicit application state, typed actions, and deterministic state transitions. These ideas are closely related to the state/action model being explored here.
-- **car-ir** — explores an intermediate representation for agent actions, including concepts such as preconditions, effects, idempotency, and failure behavior. This is particularly relevant to the validation and execution side of this project.
-
-These projects are useful references rather than things this project is trying to replace. The underlying ideas are not claimed as new.
-
-The question being explored here is:
-
-> Can these ideas be brought together into a practical software-facing layer focused on state, semantic actions, validation, revisions, and recovery?
-
-That is an engineering question that needs to be answered through implementation.
-
-## Conformance
-
-If multiple adapters are eventually created, it may be useful to have shared tests.
+## 3. State → Action → Validation → Result → Recovery
 
 ```
-Software Control IR
-        ↓
-  Conformance Tests
-    / | \
-Blender App B App C
+State
+  ↓
+Action
+  ↓
+Precondition / validation
+  ↓
+Effect
+  ↓
+Revision
+  ↓
+Recovery (named)
 ```
 
-The shared checks currently ask whether an adapter:
+**State.** IDs, geometry, text, fill, lock, active slide — whatever the adapter marks as relevant. Not necessarily the whole document.
 
-1. Resolves the requested target correctly
-2. Rejects an invalid action without mutating anything
-3. Performs the operation
-4. Reports the resulting state and effects
-5. Creates a revision when supported
-6. Restores the previous state when supported
-7. Describes its own capabilities and object types
-8. Leaves no changes behind when a batch aborts
-9. Undoes the newest revision and says which mechanism it used
+**Action.** A named operation plus target and params. `set_text` on Impress is millimetre-space slide text, not a universal command.
 
-Lab, slides, and Impress (when LibreOffice is installed) pass the same checks. They do not pass them the same way: slides can fall back to a snapshot restore where lab can compensate with an inverse action, and Impress can do both — compensation for undo, IR-to-UNO rewrite for rollback. That difference is the point of running the same checks against each adapter.
+**Validation.** Invalid actions are rejected before the adapter mutates. A locked logo fill fails with `locked` before UNO is called.
 
-This is currently a proposed direction, not an established specification.
+**Result.** Every accepted action reports effects and a revision. The live Impress path re-reads the document through UNO (`adapter.snapshot()`), not from `ActionResult.effects` alone.
 
-## The main question
-
-The project is ultimately trying to answer one question:
-
-> Can a small semantic layer make AI-controlled software more predictable, inspectable, and recoverable than relying only on screenshots or unrestricted application-specific code?
-
-I don't know the answer yet. That's the reason for building this project.
-
-## First experiment
-
-The first measurement is not “many applications.” It is one fixed protocol against a software-shaped adapter and, when LibreOffice is installed, against a live `.odp`.
-
-The protocol is `scir-compare-v0` (prompt set **v4**, **FROZEN**, experiment log `schema/experiment.v2.json`). Both agents get the same natural-language goal and the same step budget. When the driver is `live`, they also get the **same model** (`SCIR_COMPARE_MODEL`, default in `.env` is `gemini-3.6-flash`). They do not get the same tools:
+**Recovery.** The result says which mechanism ran:
 
 ```
-Screenshots + click / type / scroll / right_click
-        vs.
-Structured catalog (as-is) + undo + sync
+compensation  → inverse action, history moves forward
+snapshot      → restore recorded state; advertised only when the adapter can overwrite the host
 ```
 
-Each structured call returns the resulting state and any validation error. The vision agent has no object IDs, lock flags, or hidden-slide flags — only the rendered image and what a visible UI panel would show. Both say `DONE` or `FAILED`.
+A host can also change out of band. Further actions return `host_diverged` until an explicit `sync`. That path is the representative measurement below, not `recover_title`.
 
-There are two drivers:
+A batch either lands or leaves no changes. If a prefix cannot be inverted, the adapter says `dirty_state` instead of claiming atomicity.
 
-- **`scripted`** — frozen action lists. Deterministic baseline. No API key.
-- **`live`** — real tool loop, PNG screenshots for vision. Gemini (`GEMINI_API_KEY`) or Anthropic (`ANTHROPIC_API_KEY`). Copy `.env.example` to `.env`.
+## 4. Architecture
 
-Nine goals, in three categories (see `docs/tasks.md`):
+```
+AI agent
+    ↓
+Transport (MCP can sit here later)
+    ↓
+Software Control IR  (Session: validate, apply, sync, undo)
+    ↓
+Adapter
+    ↓
+Existing software
+```
 
-| Category | Tasks | What it is for |
+| Adapter | Host | Role |
 | --- | --- | --- |
-| **execution** | `rename_title`, `recolor_accent`, `add_callout` | Visible edits a screenshot agent can attempt |
-| **gated** | `recolor_locked_logo`, `edit_hidden_slide`, `recover_title`, `abort_rebrand`, `host_drift` | Lock, hidden slide, recovery, atomic batch, host interference — structured has a channel vision does not |
-| **vision-favorable** | `contrast_check` | Graded from the rendered raster, not from IR `set_fill` success |
+| **lab** | In-memory heater / vessel | Original fixture |
+| **slides** | In-memory deck | Software-shaped surface for the frozen compare protocol. Not PowerPoint |
+| **impress** | Live LibreOffice over UNO | First real-application measurement of the same protocol |
+| **blender** / **krita** | Live `bpy` / PyKrita | Same Adapter / Session contract, different catalogs. Not in compare v4 |
 
-Do not treat the overall win rate as the result. Gated tasks are structurally easier for the structured policy. The report prints that warning next to the combined table.
+Impress domain ops (`set_text`, `set_fill`, `create_shape`, `set_active_slide`, millimetre `move` / `resize`) live on the Impress adapter. They are not in the common core.
 
-`host_drift` is frozen as a two-edit gated recovery task. The shared goal is `Change the title to "Recovered" and set its fill to #2f6f5f.` One `set_text` cannot pass. After the title text first becomes `"Recovered"`, the harness mutates that text to `"Out of band"` out of band. The next apply returns `host_diverged`. Structured `DONE` requires `hostDiverged > 0`, an accepted `sync`, an accepted title/fill retry after that sync, and both goal checks. Vision has no `sync` tool. The prompt does not mention drift or sync. The live loop does not send `Continue.` to keep a run open.
+The catalog can be projected as typed tool descriptors. Tool names on the wire may rewrite `.` to `__` (`impress.set_text` → `impress__set_text`). That is transport. The IR operation remains `set_text` on the adapter. Do not enlarge the core to paper over the wire name.
 
-`contrast_check` uses a separate fixture (`fixtures/impress/contrast.odp` / slides `contrast` preset): white text on a light background. The structured script’s fill can succeed in IR and still fail the raster grader (WCAG AA 4.5:1). That is the point of the task.
+Accessibility trees and screenshots remain complementary. The IR is “what state and operations the software exposes,” not “what is painted.”
 
-## Progress
+## 5. Live LibreOffice Impress validation
 
-**Last updated: 2026-09-13.** Experimental / early stage. Not a standard.
+This is the contact-with-software result, not an appendix.
 
-This is a working log of what exists, what has been measured, what was found and fixed, and what is still unrun. The question in “The main question” has not been answered yet. These notes are so the next run does not re-learn the same protocol bugs at 90-run cost.
+The reproducible validation record (environment, smoke, 90-run, `host_drift` traces, artifact provenance) is [docs/live-impress-validation.md](docs/live-impress-validation.md). The same frozen v4 protocol ran on a real Impress host, including UNO state checks and recovery after drift.
 
-### Runtime and IR
+A real headless `soffice` process is started with a **private** `UserInstallation` (`scir-lo-*`), not the desktop LibreOffice profile. Node talks JSON to `src/adapters/impress/bridge.py`; the bridge talks UNO to the open `.odp`.
 
-Implemented and tested:
+```
+TypeScript Adapter → Python UNO bridge → LibreOffice Impress → live document
+```
 
-- Minimal IR: state, action, validation, effect, revision, rollback.
-- `Session`: validate before mutate; effects and revision on every accepted action; `expectedRevision` / `stale_revision`.
-- Common core stays small: `select`, `set_locked`, `delete`. Domain ops live on adapters.
-- Atomic batches: an abort reverts the accepted prefix, or the adapter says `dirty_state` instead of claiming atomicity.
-- Recovery names its mechanism: `compensation` (inverse action, revision moves forward) vs `snapshot` (restore recorded state). Snapshot restore is advertised only when the adapter can overwrite the host document.
-- Host-owned documents: out-of-band change → `host_diverged` → further actions refused until explicit `sync`. `hostOwned()` wraps an in-memory adapter so snapshot restore is not a fake product promise.
-- Relevant-state slices (current slide, not the whole deck). On a 48-object deck the relevant slice is 6 objects and about 13% of the tokens of the full document. That measures the representation, not an agent.
-- Catalog projected as typed tool descriptors + dispatcher. Compact tool results: an agent that already holds state does not get two more copies of it.
-- Published schema tested against real session output (`schema/scir.v0.json`).
-- Shared conformance suite: lab, slides, and Impress (when LibreOffice is installed) pass the same checks by different mechanisms.
+Committed fixtures: `fixtures/impress/board.odp`, `fixtures/impress/contrast.odp`. Tests copy them; they do not write the repository files.
 
-### Adapters
+If LibreOffice is missing, `ImpressAdapter.available()` is false, live tests **skip**, and `npx tsx examples/compare.ts --adapter=impress` **exits 2**. It does not fall back to the in-memory slides adapter, and it does not report a scripted run as live.
 
-| Adapter | What it is | Recovery | Notes |
+What was verified on this machine (LibreOffice **26.8.0.3**, Windows 10.0.26100):
+
+1. **Host smoke.** `set_text` on `title_01` is visible in a **fresh UNO snapshot**, not only in `ActionResult`. Save, close, reopen keeps the text.
+2. **Conformance.** The shared Adapter checks pass against the live `.odp` (compensation undo; snapshot restore of the **exposed** IR graph).
+3. **Scripted v4.** Frozen scripts, driver=`scripted`, host=real Impress. Confirms the grader on UNO state. Not a model.
+4. **Live v4 90-run.** Same frozen protocol, `gemini-3.6-flash` for both policies, N=5, 9×2×5=90, none skipped. Logs label `adapter=impress`, `driver=live`. Goal checks read the live document.
+
+Vision in that 90-run still uses a **synthetic toolbar overlay** on a host page PNG. It is not an Impress UI benchmark. `contrast_check` is still graded from the frozen **IR canvas raster**, not from the LibreOffice PNG.
+
+Writeup: [results/2026-09-15-impress-gemini-3.6-flash-n5-all-report.md](results/2026-09-15-impress-gemini-3.6-flash-n5-all-report.md). Environment: [results/2026-09-15-impress-gemini-3.6-flash-n5-all-env.json](results/2026-09-15-impress-gemini-3.6-flash-n5-all-env.json).
+
+## 6. Benchmark results
+
+Protocol `scir-compare-v0` **v4, frozen**. Same natural-language goals, same step budget, same model for structured and vision. Structured gets the catalog + `undo` + `sync`. Vision gets PNG + click / type / scroll / right_click, without object IDs or lock flags.
+
+Nine tasks: execution (`rename_title`, `recolor_accent`, `add_callout`), gated (`recolor_locked_logo`, `edit_hidden_slide`, `recover_title`, `abort_rebrand`, `host_drift`), vision-favorable (`contrast_check`). Do not lead with a combined win rate. Gated tasks are structurally easier for structured.
+
+These two experiments are **not** the same environment. Do not average them.
+
+### Experiment A — in-memory slides
+
+- **Host:** `slides` adapter (memory). Not LibreOffice, not PowerPoint.
+- **Vision:** synthetic canvas + synthetic chrome.
+- **Contrast grader:** IR canvas raster.
+- **Repeats:** N=5 (90 runs per model).
+- **Models:** `gemini-3.6-flash`, local `Qwen3.8-27B`, `claude-haiku-4-5-20251001` (each model used for both policies).
+
+Writeups: [Gemini](results/2026-09-13-slides-gemini-3.6-flash-n5-all-report.md), [Qwen](results/2026-09-14-slides-Qwen3.8-27B-n5-all-report.md), [Haiku](results/2026-09-15-slides-claude-haiku-4-5-20251001-n5-all-report.md).
+
+Category totals (structured / vision):
+
+| | Gemini | Qwen | Haiku |
 | --- | --- | --- | --- |
-| **lab** | `heater` / `vessel` stand-in | compensation, optional snapshot | Original fixture |
-| **slides** | In-memory PPT-like surface | compensation + snapshot | Not Microsoft PowerPoint. `resize` is a bounding box. Grouping is a domain op the common core should never learn |
-| **impress** | Live LibreOffice Impress over UNO | compensation for undo; snapshot restore by rewriting the live document from IR state | First contact with real software |
+| Execution (15) | 15 / 6 | 15 / 11 | 15 / 8 |
+| Gated grader (25) | 20 / 8 | 15 / 6 | 15 / 10 |
+| Mechanism-true gated (25) | 13 / 0 | 10 / 0 | 10 / 0 |
+| Vision-favorable (5) | 5 / 5 | 5 / 2 | 5 / 5 |
 
-Impress loads `fixtures/impress/board.odp` (and `contrast.odp` for `contrast_check`). Headless `soffice.com` gets a private `UserInstallation` and `--nolockcheck` so it does not become the desktop LibreOffice singleton (the failure mode that shows up as a bogus `bootstrap.ini` error). `close()` kills only that process tree. Coordinates are millimetres. Out-of-band UNO edits surface as `host_diverged` until `sync`. Direct `soffice.bin` is not the entry point — it exits without opening `--accept`. Set `SCIR_LIBREOFFICE` if LibreOffice is not in `C:\Program Files\LibreOffice\program`.
+Mechanism-true gated counts a hidden-slide body edit, an abort that undid after a mutation, and a `host_drift` that synced and retried. Vision is 0/25 on that reading for every model here.
 
-### Compare harness
+What repeats across three models: hidden state and `host_drift` are channel differences. `recover_title` 5/5 vs 5/5 is a **start-state pass** (`usedRecovery=false`). `recolor_locked_logo` 0/5 vs 0/5 is `LOCKED_TARGET_POLICY=report_failed`, not “IR cannot see locks” (structured still unlocked then filled). Vision holes **move** (Gemini fill/create; Haiku title typing). `abort_rebrand` is a model choice on the same tools.
 
-Code lives in `src/bench/compare/`. CLI: `examples/compare.ts`.
+### Experiment B — live LibreOffice Impress
 
-- Prompt set **v4 (frozen)**. Prompt **text** is still the v2 wording (no recovery hints). The bump is the two-edit `host_drift` task, inject-after-first-title-edit, and strict recovery scoring.
-- Experiment log: `schema/experiment.v2.json` (required `taskCategory`, `driver`, `runIndex`; optional `model`, `hostDriftAfterSteps`). v0/v1 are deprecated; `npm run migrate:experiment` rewrites old logs.
-- Default repeats **N=5**. Report prints `5/5`-style rates, sample standard deviation (`s_σ` / `v_σ`), category subtables, and a `spread` mark when repeats disagree.
-- Live path: Gemini (`GEMINI_API_KEY`, default `gemini-3.6-flash`) or Anthropic. Structured uses `toolDescriptors()` / `createDispatcher()`. Vision uses a PNG screenshot and maps clicks through `src/bench/compare/ui.ts`. Thinking is set to minimal on Gemini 3 so output tokens stay cheap.
-- Replay client (`createReplayClient`) drives the **same** live loop with frozen scripts so the loop is tested without spending API budget.
-- `--dry-run` forces N=1. `--scripted` uses frozen scripts. `--adapter=slides|impress|all`. `--category=`. `--task=id,id` for a subset (used by the pilot).
-- This Windows npm does **not** forward `npm run compare -- --scripted`. Use `npm run compare:scripted`, `npm run compare:dry`, `npm run compare:pilot`, `npm run compare:pilot-drift`, or `npx tsx examples/compare.ts ...`.
+- **Host:** real headless LibreOffice 26.8.0.3, private profile, UNO snapshot of a copied `.odp`.
+- **Vision:** LibreOffice page PNG + **synthetic** toolbar. Not the Impress GUI.
+- **Contrast grader:** frozen IR canvas raster (host PNG is not the verdict).
+- **Repeats:** N=5 (90 runs). None skipped.
+- **Model:** `gemini-3.6-flash` for both policies.
+- **Command:** `npx tsx examples/compare.ts --repeats=5 --adapter=impress`
 
-### Protocol bugs found before burning a 90-run
+Writeup: [Impress Gemini](results/2026-09-15-impress-gemini-3.6-flash-n5-all-report.md).
 
-These are cheap to miss in a scripted dry-run and expensive to discover after 90 live calls.
+| Category | structured | vision |
+| --- | --- | --- |
+| Execution (15) | 15 | 2 |
+| Gated grader (25) | 16 | 10 |
+| Mechanism-true gated (25) | 10 | 0 |
+| Vision-favorable (5) | 5 | 4 |
 
-**1. Vision click hit-test was leaking IR fields. Fixed.**
-
-`click(x,y)` → hit-test → UNO/IR is the right shape (a real mouse click also lands on coordinates and the app decides what was hit). The leak was in the **tool result text** sent back to the vision model: `CompactResult` went out with `effects[].target` (`logo_01`), `focus.properties.locked`, `issues[].code === "locked"`, and the right-click panel included `"locked": true`. That breaks the vision prompt’s “no lock state / no object IDs” premise and would contaminate gated tasks, especially `recolor_locked_logo`.
-
-Now the vision model only gets screenshot pixels plus visible chrome: toolbar, slide tabs, optional panel `{ fill, text }`, optional toast. The driver still knows lock state internally; experiment logs still store `step.result` for the experimenter. Tests assert that live vision `tool_result` JSON does not contain `"locked":`, seed object ids, `effects`, or `issues`. A locked edit toast is `This object cannot be edited.` — it does not name the IR field.
-
-**2. `host_drift` mutates the title text after the first required edit. Frozen in v4.**
-
-The inject is `set_text` on `title_01` to `"Out of band"`, after the title first becomes `"Recovered"`. The second required edit (`set_fill`) then hits `host_diverged`. Structured recovery is scored only if the agent syncs and retries. Vision has no `sync`.
-
-**3. A one-edit title goal let live structured finish before inject. Frozen by changing the task, not by sending `Continue.`**
-
-v4 requires title text and title fill. The 2026-09-13 one-step `set_text` rates are not this measurement. `functionCallingConfig.mode=ANY` was a diagnostic probe only; it is not part of the official loop.
-
-### What has been measured
-
-| Run | Adapter | Driver | Result |
+| Task | structured | vision | Reading |
 | --- | --- | --- | --- |
-| Scripted 9 tasks × 2 policies × 5 repeats (90) | slides | frozen scripts | Deterministic rates (5/5 where the script is supposed to succeed). Confirms the grader and logs, **not** a model. |
-| Live loop, all 9 × 2, replay client | slides | live loop, no API | Tests pass. The loop, PNG codec, click mapping, inject timing, and tool wiring are exercised. |
-| Impress conformance + compare (scripted) | live `.odp` | tests | LibreOffice path works when installed: private profile, UNO mutate, host drift, snapshot rewrite. |
-| Live model, `contrast_check` + `host_drift`, N=5 (pilot) | slides | `gemini-3.6-flash` | **Done.** [results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md](results/2026-09-13-slides-gemini-3.6-flash-n5-contrast_check+host_drift.md). `contrast_check` 5/5 vs 5/5 (scripted split did not reproduce). `host_drift` 5/5 vs 0/5, but structured never saw drift. |
-| Live model, `host_drift` only, N=5 (v4 freeze check) | slides | `gemini-3.6-flash` | **Done.** [results/2026-09-13-slides-gemini-3.6-flash-n5-host_drift.md](results/2026-09-13-slides-gemini-3.6-flash-n5-host_drift.md). Structured **5/5** with `host_diverged` → `sync` → retry. Vision **0/5**, `hostDiverged` 4/run, no `sync`. |
-| Live model, full 9 × 2 × 5 (90) | slides / impress | same model both policies | **Not run.** Protocol v4 is frozen; this is the next measurement. |
+| `rename_title` | 5/5 | 0/5 | Structured one UNO `set_text`. Vision `type` often `missing_target`. |
+| `recolor_accent` | 5/5 | 1/5 | Structured UNO `set_fill`. |
+| `add_callout` | 5/5 | 1/5 | Structured `create_shape`. |
+| `recolor_locked_logo` | 0/5 | 0/5 | **Policy.** Cannot be `DONE` under `report_failed`. Structured unlocked then filled. |
+| `edit_hidden_slide` | 5/5 | 0/5 | Structured edited `body_02`. Vision never wrote `"Shown now"`. |
+| `recover_title` | 5/5 | 5/5 | **Not recovery.** Fixture already `"Quarterly Review"`. `usedRecovery=false`. |
+| `abort_rebrand` | 1/5 | 5/5 | Structured 1/5 is inaction; 4/5 applied. Vision 5/5 is inaction. |
+| `host_drift` | 5/5 | 0/5 | Structured sync/retry on the live document (see below). Vision never reached `"Recovered"`. |
+| `contrast_check` | 5/5 | 4/5 | IR-canvas WCAG, not a LibreOffice PNG grade. |
 
-Scripted vision “success” is a script hitting the right pixels. It is not evidence that a vision model can do the task. The live pilot is the first same-model measurement; the 90-run is still missing.
+Structured execution and the drift path ran on a real `.odp`. Vision numbers here measure synthetic chrome plus a small host PNG, not “the model used Impress.”
 
-### What to run next
+## 7. `host_drift` recovery example
 
-1. Full live 90-run (9 tasks × 2 policies × 5) on v4. Read category tables, not the combined rate.
-2. Do not change `host_drift` or the compare protocol to chase a higher rate.
-3. Optional: same live protocol against Impress.
+This is the case that shows state verification and recovery against software the IR does not own.
 
-### Tests
+Shared goal (no mention of drift or sync in the prompt):
 
-`npm test` is currently **118** tests (Vitest). Impress tests skip or run depending on LibreOffice + fixtures. `npm run typecheck` is clean.
+> Change the title to "Recovered" and set its fill to #2f6f5f.
 
-## Current status
+After the title first becomes `"Recovered"`, the harness writes `"Out of band"` through the adapter (`execute`, not the agent). The next apply must see `host_diverged`. Structured `DONE` requires that divergence, an accepted `sync`, a retry of title/fill after sync, and a UNO snapshot that actually holds `"Recovered"` / `#2f6f5f`.
 
-**Experimental / Early Stage**
+On live Impress, Gemini structured did this on all five repeats:
 
-This project is not presented as an established standard. The semantic model, adapter interface, and conformance approach are still being explored.
+```
+set_text title_01 "Recovered"     accepted
+set_fill title_01 #2f6f5f         rejected  host_diverged
+sync                              accepted
+set_text title_01 "Recovered"     accepted
+set_fill title_01 #2f6f5f         accepted
+```
 
-The immediate priority is not a large specification. It is a small working implementation, contact with one real application, and a measurement that can fail.
+```
+host snapshot (UNO)
+  title_01.text = "Recovered"
+  title_01.fill = #2f6f5f
+usedSync = true
+hostDiverged = 1
+```
 
-This repository currently includes:
+That is the IR loop: detect that the host moved, refuse to keep writing, require an explicit sync, then verify the document — not the tool-result payload.
 
-- a minimal IR for state, action, validation, effect, revision, and rollback
-- a `Session` runtime that validates before mutate
-- a small **common core**: `select`, `set_locked`, `delete`
-- atomic batches, and undo that reports whether it compensated or restored a snapshot
-- host-owned mode: no snapshot overwrite, drift detection, explicit sync, stale `expectedRevision`
-- a **lab** adapter (`heater` / `vessel`) as the original stand-in
-- a **slides** adapter with PPT-like domain operations: `create_shape`, `set_fill`, `set_text`, `resize`, `align`, plus `duplicate`, `bring_to_front`, `send_to_back`, `group`, `ungroup`
-- a **LibreOffice Impress** adapter against a live `.odp`
-- relevant-state slices that walk the object tree (current slide, not the whole deck)
-- adapter self-description, so an agent can read capabilities instead of probing for them
-- the catalog projected as typed tool descriptors, with a dispatcher
-- action traces that can be replayed
-- a measurement harness: structured vs naive scripts, rollback recovery, batch atomicity, and state size
-- a fixed compare protocol (`scir-compare-v0` **v4, frozen**): nine tasks, scripted baseline **and** a live model loop, experiment logs in `schema/experiment.v2.json`
-- shared conformance checks against lab, slides, and Impress when LibreOffice is installed
-- a JSON schema that real session output is tested against
-- a local demo that places pixel space next to structured state
+Vision has no `sync`. In this Impress run it never produced `"Recovered"`, so the inject never fired (`hostDiverged=0`). That is the expected gated miss for this observation channel, not a claim that screenshots can recover from host edits.
 
-The slides adapter is still in-memory. It is a software-shaped surface, not Microsoft PowerPoint. Resize here means a bounding box, which is intentionally not Blender scale or a CAD constraint. Grouping is the clearest case so far of a domain operation the common core should never learn: it is a slide concept, it has no single inverse action, and `delete` correctly refuses a group that still has members.
+The same structured sequence appeared on the in-memory slides Gemini/Qwen/Haiku runs. The Impress run is the one that did it on a live soffice document.
 
-The Impress adapter talks to a live LibreOffice document over UNO. It loads committed fixtures instead of factory-seeding a deck. Snapshot restore rebuilds the live document from IR state. That is a declared capability, not a default for every adapter.
+`recover_title` is **not** this story. Its 5/5 vs 5/5 is the start state already being `"Quarterly Review"`.
 
-## Design principles
+## 8. Limitations
 
-1. Use structured state when the application already knows the answer. Don't make an AI infer exact information from pixels when the application can provide it directly.
-2. Keep the common core small. Not every application needs to expose the same operations.
-3. Validate before modifying. An action should be checked against the available state whenever possible.
-4. Make changes observable. The system should be able to describe what changed.
-5. Prefer reversible operations. When the underlying application allows it, changes should be recoverable.
-6. Measure before making big claims. The project should earn its abstractions through working implementations and benchmarks.
+- This is an experiment. It is not a replacement for MCP, OpenAPI, application APIs, GUI automation, or a finished industry standard. It does not claim vision agents are obsolete.
+- **In-memory slides ≠ live Impress.** Do not treat those 90-runs as one table.
+- Vision never used the real Impress UI. Chrome is a **synthetic toolbar** painted onto a screenshot.
+- `contrast_check` grades the **IR canvas**, as frozen in v4. A LibreOffice PNG that disagreed would not change the verdict.
+- `recover_title` 5/5 is a **false pass** for recovery skill.
+- `recolor_locked_logo` 0/5 is a **product policy** (`report_failed`), not an IR blindness to locks.
+- Recovery only covers state the adapter exposes. Impress snapshot restore rewrites that graph; it is not a binary `.odp` time machine. Krita pixels and Blender meshes are not in their restore spaces.
+- Impress vision screenshots in the live 90-run were small host PNGs (~96×54 before padding). `type` after `click` often returned `missing_target`. That is adapter/render + fake UI, not a reason to unfreeze v4.
+- `scir.transaction` with `impress__set_text` / `slides__set_text` is `unknown_operation`. Apply still works via catalog actions. Do not grow the common core for the wire name.
+- Blender and Krita are conformance hosts, not compare v4.
 
-## Roadmap
+## 9. Roadmap
 
-- [x] Define a minimal IR schema
-- [x] Implement State / Action / Result
-- [x] Add validation and preconditions
-- [x] Add revision tracking
-- [x] Explore rollback
-- [x] Build the first application adapter (lab scene stand-in)
-- [x] Add a software-shaped adapter (slides / PPT-like operations)
-- [x] Create basic conformance tests
-- [x] Add a first measurement harness (scripted structured vs naive, not yet vs a vision model)
-- [x] Add atomic batches and inverse-action recovery
-- [x] Measure the size of full state against the relevant slice
-- [x] Project the catalog as tool descriptors, so a transport can carry the IR
-- [x] Test the published schema against real session output
-- [x] Stop assuming the IR owns the document (snapshot restore is a capability, not a default)
-- [x] Build an adapter against real software (LibreOffice Impress)
-- [x] Fix a compare protocol, task set, scripted vision baseline, and experiment log schema
-- [x] Build a live model loop (same model for structured and vision; PNG screenshots; N repeats)
-- [x] Stop vision tool results from leaking IR lock fields and object ids
-- [x] Run the live pilot (`contrast_check` + `host_drift`, N=5) against `gemini-3.6-flash`
-- [x] Freeze compare protocol v4: two-edit `host_drift`, inject after first title edit, strict sync/retry scoring
-- [ ] Run the full live 90-run (9 tasks × 2 policies × 5) and read category tables, not the combined rate
-- [ ] Optional: same live protocol against Impress
-- [ ] Refine the IR based on those measurements, not on the scripted baseline
+- [x] Minimal IR: state, action, validation, effect, revision, named recovery
+- [x] `Session` validates before mutate; host-owned drift + `sync`; atomic batches
+- [x] Lab and in-memory slides adapters
+- [x] LibreOffice Impress adapter (live UNO, private profile)
+- [x] Frozen compare protocol v4 and a live model loop
+- [x] Three same-protocol 90-runs on in-memory slides (Gemini, Qwen, Haiku)
+- [x] Same frozen protocol on live Impress (Gemini), after scripted + one-task smoke
+- [x] Blender / Krita adapters for the shared conformance suite (not v4)
+- [ ] Optional: another slides model — not required to read the tables above
+- [ ] Refine the IR from these measurements (do not unfreeze v4 to chase a rate)
+
+v4 stays frozen. Do not change `host_drift`, prompts, or scoring to chase a higher number. Do not clone these nine tasks onto Blender or Krita.
 
 ## What this is not
 
-This project is not intended to be:
-
-- A replacement for MCP
-- A replacement for OpenAPI
-- A replacement for application APIs
+- A replacement for MCP, OpenAPI, or application APIs
 - A GUI automation framework
-- A universal command language for every application
+- A universal command language
 - A claim that vision-based agents are obsolete
 - A finished industry standard
-
-It is an experiment around a possible missing layer between AI agents and existing software.
 
 ## Run it
 
@@ -688,46 +280,17 @@ It is an experiment around a possible missing layer between AI agents and existi
 npm install
 npm test
 npm run typecheck
-npm run example
-npm run example:slides
-npm run conformance
-npm run tools
 npm run example:impress
-npm run bench
+npm run conformance
 npm run compare:scripted
-npm run compare:dry
-npm run compare:pilot
-npm run compare:pilot-drift
-npm run dev
+npx tsx examples/compare.ts --scripted --adapter=impress
 ```
 
-`npm run example:impress` starts a headless LibreOffice, opens `fixtures/impress/board.odp`, and runs `set_text` against the live document. Set `SCIR_LIBREOFFICE` if LibreOffice is not in `C:\Program Files\LibreOffice\program`. On Windows the launcher is `soffice.com` with a private `UserInstallation`; `close()` kills only that process tree. Direct `soffice.bin` is not the entry point — it exits without opening `--accept`. `npm run fixture:impress` / `npm run fixture:impress-contrast` rewrite the committed decks from the factory seed; that seed path is not how the adapter runs.
+Copy `.env.example` to `.env`. Live compare needs `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / a local OpenAI-compatible server. Both policies must share `SCIR_COMPARE_MODEL`. This Windows npm does not forward `npm run compare -- --flags`; use the named scripts or `npx tsx examples/compare.ts ...`.
 
-### Compare
-
-Default `npm run compare` is the **live** driver and exits if there is no API key. Use the named scripts on Windows; `npm run compare -- --scripted` is not forwarded by this npm.
-
-| Command | What it does |
-| --- | --- |
-| `npm run compare:scripted` | Frozen scripts, N=5, slides + Impress if present |
-| `npm run compare:dry` | Scripted, N=1 |
-| `npm run compare:pilot` | **Live** `contrast_check` + `host_drift`, N=5, slides only. Needs an API key |
-| `npm run compare:pilot-drift` | **Live** `host_drift` only, N=5, slides. Check `usedSync` / `hostDiverged` |
-| `npm run compare:probe-diverged` | **Live** structured-only probe: what happens after a real `host_diverged` tool_result |
-| `npx tsx examples/compare.ts --scripted --adapter=slides --repeats=5` | Scripted slides 90-run |
-| `npx tsx examples/compare.ts --task=contrast_check --repeats=5 --adapter=slides` | Live one-task subset |
-
-Environment: `GEMINI_API_KEY` or `ANTHROPIC_API_KEY`; `SCIR_COMPARE_MODEL` (`.env` default `gemini-3.6-flash`), `SCIR_COMPARE_PROVIDER`, `SCIR_COMPARE_REPEATS`, `SCIR_COMPARE_ADAPTER`, `SCIR_COMPARE_DRIVER`, `SCIR_COMPARE_TASKS`, `SCIR_COMPARE_DRY_RUN=1`.
-
-Both live policies must share the same model. Splitting models would measure Claude vs GPT, not structured IR vs screenshots.
+`npm run example:impress` starts headless LibreOffice, opens `fixtures/impress/board.odp`, and runs `set_text` against the live document. Set `SCIR_LIBREOFFICE` if LibreOffice is not in `C:\Program Files\LibreOffice\program`. Direct `soffice.bin` is not the entry point.
 
 Task catalog: `docs/tasks.md`. Log schema: `schema/experiment.v2.json`.
-
-`npm run conformance` prints the shared checks for lab, slides, and Impress when LibreOffice and the `.odp` fixture are present, including which recovery mechanism each one used.
-
-`npm run tools` prints the catalog as tool descriptors and runs a few calls through the dispatcher.
-
-`npm run dev` opens a demo with pixel space next to structured state. The default adapter is slides: `create_shape` is a catalog operation, not a drawing primitive. Toggle **relevant only** to see the current slide instead of the whole deck, with the token cost of each shown above the state. Shift-click marks shapes to **Group**. Pasting an array into the action box applies it as one atomic batch, and **Load a batch that must abort** sets up a batch whose accepted prefix gets reverted. **as tools** shows what an agent would be handed. **Measure** runs the harness in the result panel.
 
 ## License
 
@@ -735,6 +298,4 @@ TBD
 
 ## Contributing
 
-Early experimentation, discussion, and implementations are welcome.
-
-The most useful contributions will likely come from trying the model against real software and discovering where it works — and where it breaks.
+Early experimentation, discussion, and implementations are welcome. The useful work is still contact with real software and honest measurement of where the IR holds — and where it does not.

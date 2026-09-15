@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=scir_bridge
+Name=Software Control IR Bridge
+Comment=Localhost TCP bridge for the Software Control IR Krita adapter

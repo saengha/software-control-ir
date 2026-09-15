@@ -1,5 +1,5 @@
 import type { ToolDescriptor } from "../../transport/tools.js";
-import { COMPARE_LIVE_MODEL, compareProvider } from "./settings.js";
+import { COMPARE_LIVE_MODEL, compareBaseUrl, compareProvider } from "./settings.js";
 import { VISION_TOOL_DESCRIPTORS } from "./prompts.js";
 import type { ComparePolicy } from "./protocol.js";
 
@@ -69,9 +69,10 @@ export function isRetryable(error: unknown): boolean {
   if (error instanceof RetryableModelError) {
     return [408, 409, 429, 500, 502, 503, 529].includes(error.status);
   }
-  if (error instanceof Error && /fetch|network|ECONNRESET|ETIMEDOUT|socket/i.test(error.message)) {
+  if (error instanceof Error && /fetch|network|ECONNRESET|ETIMEDOUT|socket|aborted|timeout/i.test(error.message)) {
     return true;
   }
+  if (error instanceof Error && error.name === "TimeoutError") return true;
   return false;
 }
 
@@ -128,6 +129,20 @@ interface AnthropicResponse {
   error?: { message?: string; type?: string };
 }
 
+/** Anthropic tool names are [a-zA-Z0-9_-]. Catalog ids use dots (`slides.set_text`). */
+export function toAnthropicMessages(messages: ModelMessage[]): ModelMessage[] {
+  return messages.map((message) => {
+    if (typeof message.content === "string") return message;
+    if (message.role !== "assistant") return message;
+    return {
+      role: "assistant",
+      content: (message.content as AssistantContent[]).map((part) =>
+        part.type === "tool_use" ? { ...part, name: wireToolName(part.name) } : part,
+      ),
+    };
+  });
+}
+
 export function createAnthropicClient(
   apiKey: string,
   model = COMPARE_LIVE_MODEL,
@@ -143,27 +158,37 @@ export function createAnthropicClient(
             "x-api-key": apiKey,
             "anthropic-version": "2023-06-01",
           },
-            body: JSON.stringify({
+          body: JSON.stringify({
             model,
             max_tokens: 2048,
             system: request.system,
-            tools: request.tools,
-            messages: request.messages,
+            tools: request.tools.map((tool) => ({
+              name: wireToolName(tool.name),
+              description: tool.description,
+              input_schema: tool.input_schema,
+            })),
+            messages: toAnthropicMessages(request.messages),
             ...(request.functionCallMode === "any" ? { tool_choice: { type: "any" } } : {}),
           }),
+          signal: AbortSignal.timeout(600_000),
         });
         const body = (await response.json()) as AnthropicResponse;
         if (!response.ok) {
-          throw new RetryableModelError(
-            response.status,
-            body.error?.message ?? `Anthropic HTTP ${response.status}`,
-          );
+          const message = body.error?.message ?? `Anthropic HTTP ${response.status}`;
+          if ([408, 409, 429, 500, 502, 503, 529].includes(response.status)) {
+            throw new RetryableModelError(response.status, message);
+          }
+          throw new Error(message);
         }
         const toolCalls: ModelToolCall[] = [];
         const texts: string[] = [];
         for (const block of body.content ?? []) {
           if (block.type === "tool_use" && block.id && block.name) {
-            toolCalls.push({ id: block.id, name: block.name, input: block.input ?? {} });
+            toolCalls.push({
+              id: block.id,
+              name: fromWireToolName(block.name),
+              input: block.input ?? {},
+            });
           }
           if (block.type === "text" && block.text) texts.push(block.text);
         }
@@ -198,13 +223,22 @@ interface GeminiApiResponse {
   error?: { code?: number; message?: string; status?: string };
 }
 
-/** Gemini function names cannot contain `.`. */
-export function geminiToolName(name: string): string {
+/** Gemini, OpenAI, and Anthropic function names cannot contain `.`. */
+export function wireToolName(name: string): string {
   return name.replaceAll(".", "__");
 }
 
-export function fromGeminiToolName(name: string): string {
+export function fromWireToolName(name: string): string {
   return name.replaceAll("__", ".");
+}
+
+/** @deprecated Use wireToolName. Kept so existing tests keep compiling. */
+export function geminiToolName(name: string): string {
+  return wireToolName(name);
+}
+
+export function fromGeminiToolName(name: string): string {
+  return fromWireToolName(name);
 }
 
 function asStruct(text: string): Record<string, unknown> {
@@ -248,7 +282,7 @@ function toolResultParts(
   names: Map<string, string>,
 ): GeminiPart[] {
   const original = names.get(part.tool_use_id) ?? "unknown";
-  const name = geminiToolName(original);
+  const name = wireToolName(original);
   if (typeof part.content === "string") {
     return [{ functionResponse: { name, response: asStruct(part.content) } }];
   }
@@ -283,8 +317,8 @@ export function toGeminiContents(messages: ModelMessage[]): GeminiContent[] {
           const geminiPart: GeminiPart = {
             functionCall:
               Object.keys(part.input).length > 0
-                ? { name: geminiToolName(part.name), args: part.input }
-                : { name: geminiToolName(part.name) },
+                ? { name: wireToolName(part.name), args: part.input }
+                : { name: wireToolName(part.name) },
           };
           if (part.thoughtSignature) geminiPart.thoughtSignature = part.thoughtSignature;
           parts.push(geminiPart);
@@ -326,7 +360,7 @@ export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): 
               tools: [
                 {
                   functionDeclarations: request.tools.map((tool) => ({
-                    name: geminiToolName(tool.name),
+                    name: wireToolName(tool.name),
                     description: tool.description,
                     parameters: geminiParameters(tool),
                   })),
@@ -355,7 +389,7 @@ export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): 
             i += 1;
             const call: ModelToolCall = {
               id: `gemini_${i}_${part.functionCall.name}`,
-              name: fromGeminiToolName(part.functionCall.name),
+              name: fromWireToolName(part.functionCall.name),
               input: part.functionCall.args ?? {},
             };
             if (part.thoughtSignature) call.thoughtSignature = part.thoughtSignature;
@@ -373,8 +407,222 @@ export function createGeminiClient(apiKey: string, model = COMPARE_LIVE_MODEL): 
   };
 }
 
+interface OpenAiToolCall {
+  id?: string;
+  type?: string;
+  function?: { name?: string; arguments?: string };
+}
+
+interface OpenAiMessage {
+  role: "system" | "user" | "assistant" | "tool";
+  content?: string | Array<Record<string, unknown>> | null;
+  tool_calls?: OpenAiToolCall[];
+  tool_call_id?: string;
+}
+
+interface OpenAiApiResponse {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+      tool_calls?: OpenAiToolCall[];
+    };
+    finish_reason?: string;
+  }>;
+  error?: { message?: string; type?: string; code?: string };
+}
+
+export function openaiChatUrl(baseUrl = compareBaseUrl() ?? "https://api.openai.com/v1"): string {
+  return `${baseUrl.replace(/\/+$/, "")}/chat/completions`;
+}
+
+function parseToolArguments(raw: string | undefined): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return isPlain(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function toOpenAiMessages(system: string, messages: ModelMessage[]): OpenAiMessage[] {
+  const out: OpenAiMessage[] = [{ role: "system", content: system }];
+  for (const message of messages) {
+    if (typeof message.content === "string") {
+      out.push({ role: message.role === "assistant" ? "assistant" : "user", content: message.content });
+      continue;
+    }
+    if (message.role === "assistant") {
+      const parts = message.content as AssistantContent[];
+      const text = parts.filter((part) => part.type === "text").map((part) => part.text).join("\n");
+      const toolCalls: OpenAiToolCall[] = parts
+        .filter((part) => part.type === "tool_use")
+        .map((part) => ({
+          id: part.id,
+          type: "function",
+          function: { name: wireToolName(part.name), arguments: JSON.stringify(part.input ?? {}) },
+        }));
+      const assistant: OpenAiMessage = { role: "assistant", content: text.length > 0 ? text : null };
+      if (toolCalls.length > 0) assistant.tool_calls = toolCalls;
+      out.push(assistant);
+      continue;
+    }
+    const images: ModelImageContent[] = [];
+    for (const part of message.content as ModelContent[]) {
+      if (part.type === "text") {
+        out.push({ role: "user", content: part.text });
+        continue;
+      }
+      if (part.type !== "tool_result") continue;
+      let text = "{}";
+      if (typeof part.content === "string") {
+        text = part.content;
+      } else {
+        for (const item of part.content) {
+          if (item.type === "text") text = item.text;
+          else if (item.type === "image") images.push(item);
+        }
+      }
+      out.push({ role: "tool", tool_call_id: part.tool_use_id, content: text });
+    }
+    if (images.length > 0) {
+      out.push({
+        role: "user",
+        content: images.map((image) => ({
+          type: "image_url",
+          image_url: { url: `data:${image.source.media_type};base64,${image.source.data}` },
+        })),
+      });
+    }
+  }
+  return dropStaleOpenAiImages(out);
+}
+
+function isImageUserMessage(message: OpenAiMessage): boolean {
+  return (
+    message.role === "user" &&
+    Array.isArray(message.content) &&
+    message.content.some((part) => part.type === "image_url")
+  );
+}
+
+/** vLLM / many VLMs cap images per prompt. Keep the current screenshot only. */
+function dropStaleOpenAiImages(messages: OpenAiMessage[]): OpenAiMessage[] {
+  let last = -1;
+  for (let i = 0; i < messages.length; i += 1) {
+    if (isImageUserMessage(messages[i])) last = i;
+  }
+  if (last < 0) return messages;
+  return messages.filter((message, i) => !isImageUserMessage(message) || i === last);
+}
+
+function qwenLocalExtras(model: string, baseUrl: string): Record<string, unknown> {
+  const local = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1/i.test(baseUrl);
+  if (!/qwen/i.test(model) && !local) return {};
+  if (!/qwen/i.test(model)) return {};
+  return {
+    temperature: 1,
+    top_p: 0.95,
+    chat_template_kwargs: { enable_thinking: false },
+  };
+}
+
+export function parseContextHeadroom(message: string): number | undefined {
+  const max = message.match(/maximum context length is (\d+)/i);
+  const input = message.match(/prompt contains at least (\d+) input tokens/i);
+  if (!max || !input) return undefined;
+  return Math.max(64, Number(max[1]) - Number(input[1]) - 32);
+}
+
+export function defaultOpenAiMaxTokens(model: string, baseUrl: string): number {
+  if (/qwen/i.test(model) || /localhost|127\.0\.0\.1|0\.0\.0\.0|::1/i.test(baseUrl)) return 1024;
+  return 2048;
+}
+
+export function createOpenAiClient(
+  apiKey: string,
+  model = COMPARE_LIVE_MODEL,
+  baseUrl = compareBaseUrl() ?? "https://api.openai.com/v1",
+): ModelClient {
+  const url = openaiChatUrl(baseUrl);
+  return {
+    model,
+    async complete(request: ModelRequest): Promise<ModelResponse> {
+      return withBackoff(async () => {
+        let maxTokens = defaultOpenAiMaxTokens(model, baseUrl);
+        let retriedContext = false;
+        while (true) {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              max_tokens: maxTokens,
+              messages: toOpenAiMessages(request.system, request.messages),
+              tools: request.tools.map((tool) => ({
+                type: "function",
+                function: {
+                  name: wireToolName(tool.name),
+                  description: tool.description,
+                  parameters: {
+                    type: "object",
+                    properties: tool.input_schema.properties ?? {},
+                    ...(tool.input_schema.required && tool.input_schema.required.length > 0
+                      ? { required: tool.input_schema.required }
+                      : {}),
+                  },
+                },
+              })),
+              tool_choice: request.functionCallMode === "any" ? "required" : "auto",
+              ...qwenLocalExtras(model, baseUrl),
+            }),
+            signal: AbortSignal.timeout(600_000),
+          });
+          const body = (await response.json()) as OpenAiApiResponse;
+          if (!response.ok) {
+            const err = body.error?.message ?? `OpenAI HTTP ${response.status}`;
+            const headroom = parseContextHeadroom(err);
+            if (!retriedContext && headroom !== undefined && headroom < maxTokens) {
+              retriedContext = true;
+              maxTokens = headroom;
+              continue;
+            }
+            if ([408, 409, 429, 500, 502, 503, 529].includes(response.status)) {
+              throw new RetryableModelError(response.status, err);
+            }
+            throw new Error(err);
+          }
+          const message = body.choices?.[0]?.message;
+          const toolCalls: ModelToolCall[] = [];
+          let i = 0;
+          for (const call of message?.tool_calls ?? []) {
+            if (!call.function?.name) continue;
+            i += 1;
+            toolCalls.push({
+              id: call.id ?? `openai_${i}_${call.function.name}`,
+              name: fromWireToolName(call.function.name),
+              input: parseToolArguments(call.function.arguments),
+            });
+          }
+          return {
+            text: message?.content ?? "",
+            toolCalls,
+            stop: toolCalls.length > 0 ? "tool" : "end",
+          };
+        }
+      });
+    },
+  };
+}
+
 export function createLiveClient(apiKey: string, model = COMPARE_LIVE_MODEL): ModelClient {
-  return compareProvider() === "gemini" ? createGeminiClient(apiKey, model) : createAnthropicClient(apiKey, model);
+  const provider = compareProvider();
+  if (provider === "gemini") return createGeminiClient(apiKey, model);
+  if (provider === "openai") return createOpenAiClient(apiKey, model);
+  return createAnthropicClient(apiKey, model);
 }
 
 export function parseStopVerdict(text: string): "DONE" | "FAILED" | undefined {

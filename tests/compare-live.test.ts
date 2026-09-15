@@ -17,13 +17,21 @@ import {
   runCompareLive,
   runSlidesCompare,
   sampleStdev,
+  toAnthropicMessages,
   toGeminiContents,
+  toOpenAiMessages,
   visionToolFeedback,
   withBackoff,
 } from "../src/index.js";
 import { COMPARE_TASKS } from "../src/bench/compare/tasks.js";
 import { decodePngRgb, encodePngRgb } from "../src/adapters/impress/png.js";
-import { RetryableModelError, type ModelClient, type ModelRequest } from "../src/bench/compare/model.js";
+import {
+  RetryableModelError,
+  defaultOpenAiMaxTokens,
+  parseContextHeadroom,
+  type ModelClient,
+  type ModelRequest,
+} from "../src/bench/compare/model.js";
 import { executeUiAction } from "../src/bench/compare/ui.js";
 
 describe("compare repeats and aggregation", () => {
@@ -157,6 +165,127 @@ describe("gemini live mapping", () => {
     const payload = JSON.stringify(toGeminiContents(messages));
     expect(payload).toContain("host_diverged");
     expect(payload).toContain("Call sync before applying more actions");
+  });
+});
+
+describe("openai live mapping", () => {
+  it("rewrites dotted catalog names and sends screenshots as image_url after the tool result", () => {
+    const messages = toOpenAiMessages("system prompt", [
+      { role: "user", content: 'Goal: Set the title to "Board Update".' },
+      {
+        role: "assistant",
+        content: [{ type: "tool_use", id: "t1", name: "screenshot", input: {} }],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "t1",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "aaaa" } },
+              { type: "text", text: JSON.stringify({ width: 640, height: 400, chrome: { toolbar: [] } }) },
+            ],
+          },
+        ],
+      },
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "t2",
+            name: "slides.set_text",
+            input: { target: "title_01", value: "Board Update" },
+          },
+        ],
+      },
+    ]);
+    expect(messages[0]).toEqual({ role: "system", content: "system prompt" });
+    expect(messages[2]?.tool_calls?.[0]?.function?.name).toBe("screenshot");
+    expect(messages[3]).toMatchObject({ role: "tool", tool_call_id: "t1" });
+    expect(JSON.stringify(messages[3])).not.toContain("logo_01");
+    const imageTurn = messages.find(
+      (message) =>
+        message.role === "user" &&
+        Array.isArray(message.content) &&
+        message.content.some((part) => String(part.type) === "image_url"),
+    );
+    expect(JSON.stringify(imageTurn)).toContain("data:image/png;base64,aaaa");
+    expect(messages.find((message) => message.tool_calls?.[0]?.function?.name === "slides__set_text")).toBeTruthy();
+  });
+
+  it("keeps only the latest screenshot so vLLM image caps are not exceeded", () => {
+    const messages = toOpenAiMessages("sys", [
+      { role: "user", content: "Goal: add a rectangle." },
+      { role: "assistant", content: [{ type: "tool_use", id: "s1", name: "screenshot", input: {} }] },
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "s1",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "old" } },
+              { type: "text", text: "{}" },
+            ],
+          },
+        ],
+      },
+      { role: "assistant", content: [{ type: "tool_use", id: "s2", name: "screenshot", input: {} }] },
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "s2",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "new" } },
+              { type: "text", text: "{}" },
+            ],
+          },
+        ],
+      },
+    ]);
+    const images = messages.filter(
+      (message) =>
+        message.role === "user" &&
+        Array.isArray(message.content) &&
+        message.content.some((part) => String(part.type) === "image_url"),
+    );
+    expect(images).toHaveLength(1);
+    expect(JSON.stringify(images[0])).toContain("data:image/png;base64,new");
+    expect(JSON.stringify(images[0])).not.toContain("data:image/png;base64,old");
+  });
+
+  it("leaves output headroom under a local 8192 context window", () => {
+    const overflow =
+      "This model's maximum context length is 8192 tokens. However, you requested 2048 output tokens and your prompt contains at least 6145 input tokens, for a total of at least 8193 tokens.";
+    expect(parseContextHeadroom(overflow)).toBe(2015);
+    expect(defaultOpenAiMaxTokens("Qwen3.8-27B", "http://127.0.0.1:8000/v1")).toBe(1024);
+    expect(defaultOpenAiMaxTokens("gpt-5", "https://api.openai.com/v1")).toBe(2048);
+  });
+});
+
+describe("anthropic live mapping", () => {
+  it("rewrites dotted catalog names so Claude tool ids stay alphanumeric", () => {
+    const messages = toAnthropicMessages([
+      { role: "user", content: 'Goal: Set the title to "Board Update".' },
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "t2",
+            name: "slides.set_text",
+            input: { target: "title_01", value: "Board Update" },
+          },
+        ],
+      },
+    ]);
+    expect(messages[0]).toEqual({ role: "user", content: 'Goal: Set the title to "Board Update".' });
+    const toolUse = (messages[1]?.content as { type: string; name: string }[])[0];
+    expect(toolUse).toMatchObject({ type: "tool_use", name: "slides__set_text" });
   });
 });
 

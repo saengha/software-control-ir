@@ -28,6 +28,7 @@ export {
   COMPARE_LIVE_MODEL,
   COMPARE_REPEATS,
   HOST_DRIFT_AFTER_STEPS,
+  compareBaseUrl,
   compareProvider,
   liveApiKey,
 } from "./settings.js";
@@ -43,13 +44,21 @@ export {
   createAnthropicClient,
   createGeminiClient,
   createLiveClient,
+  createOpenAiClient,
   createReplayClient,
+  defaultOpenAiMaxTokens,
   fromGeminiToolName,
+  fromWireToolName,
   geminiToolName,
+  parseContextHeadroom,
+  toAnthropicMessages,
   toGeminiContents,
+  toOpenAiMessages,
   geminiContentsIncludeHostDiverged,
+  openaiChatUrl,
   withBackoff,
   toolsForPolicy,
+  wireToolName,
 } from "./model.js";
 export { runHostDivergedProbe, formatHostDivergedProbe } from "./probe-diverged.js";
 export type { CompareMetrics, CompareRunLog, CompareRunOptions, CompareStepLog, CompareVerdict } from "./run.js";
@@ -68,6 +77,7 @@ export interface CompareSuiteOptions {
   category?: string;
   tasks?: string[];
   repeats?: number;
+  onLog?: (log: CompareRunLog) => void;
 }
 
 function tasksToRun(options?: { category?: string; tasks?: string[] }): CompareTask[] {
@@ -113,6 +123,11 @@ export async function runCompareSuiteLive(
       options?.prepare?.(task);
       for (const policy of COMPARE_POLICIES) {
         logs.push(await runCompareLive(adapter, task, policy, client, { runIndex, driver: "live", model: client.model }));
+        const last = logs[logs.length - 1];
+        options?.onLog?.(last);
+        console.log(
+          `${adapter.id}\t${task.id}\t${policy}\tr${runIndex}\t${last.metrics.verdict}\tsteps=${last.metrics.steps}`,
+        );
         options?.reset?.();
       }
     }
@@ -138,7 +153,7 @@ export function runSlidesCompare(options?: { category?: string; tasks?: string[]
 
 export async function runSlidesCompareLive(
   client: ModelClient,
-  options?: { category?: string; tasks?: string[]; repeats?: number },
+  options?: { category?: string; tasks?: string[]; repeats?: number; onLog?: (log: CompareRunLog) => void },
 ): Promise<CompareRunLog[]> {
   const logs: CompareRunLog[] = [];
   const repeats = options?.repeats && options.repeats > 0 ? options.repeats : 1;
@@ -149,6 +164,11 @@ export async function runSlidesCompareLive(
       for (const policy of COMPARE_POLICIES) {
         logs.push(
           await runCompareLive(adapter, task, policy, client, { runIndex, driver: "live", model: client.model }),
+        );
+        const last = logs[logs.length - 1];
+        options?.onLog?.(last);
+        console.log(
+          `${task.id}\t${policy}\tr${runIndex}\t${last.metrics.verdict}\tsteps=${last.metrics.steps}`,
         );
         adapter.restore(cloneJson(initial));
       }
