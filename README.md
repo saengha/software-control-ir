@@ -309,7 +309,7 @@ Task catalog: `docs/tasks.md`. Log schema: `schema/experiment.v2.json`.
 
 ## License
 
-MIT
+AGPL-3.0
 
 ## Contributing
 
