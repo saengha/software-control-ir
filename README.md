@@ -10,6 +10,21 @@ The question:
 
 This repository measures that question against a frozen protocol (`scir-compare-v0` **v4**) and against a live LibreOffice Impress process.
 
+## Benchmarks
+
+Protocol `scir-compare-v0` v4 — 9 tasks, N=5 repeats per task, 90 runs per experiment. Structured IR vs vision-based control. See [§6](#6-benchmark-results) for full methodology and caveats.
+
+| Experiment | Model | Structured | Vision |
+| --- | --- | --- | --- |
+| In-memory slides | Gemini 3.6 flash | 40/45 (89%) | 19/45 (42%) |
+| In-memory slides | Qwen 3.8-27B | 35/45 (78%) | 19/45 (42%) |
+| In-memory slides | Claude Haiku 4.5 | 35/45 (78%) | 23/45 (51%) |
+| **Live LibreOffice Impress** | Gemini 3.6 flash | 36/45 (80%) | 16/45 (36%) |
+
+Key observation: `host_drift` recovery (detect out-of-band edit → sync → retry) succeeded 5/5 for structured IR across all models and adapters. Vision achieved 0/5 — it has no `sync` mechanism.
+
+*Source: `results/2026-09-13-slides-gemini-3.6-flash-n5-all.md`, `results/2026-09-14-slides-Qwen3.8-27B-n5-all.md`, `results/2026-09-15-slides-claude-haiku-4-5-20251001-n5-all.md`, `results/2026-09-15-impress-gemini-3.6-flash-n5-all.md`*
+
 ## 1. Problem
 
 Agents already drive software in two common ways:
@@ -294,7 +309,7 @@ Task catalog: `docs/tasks.md`. Log schema: `schema/experiment.v2.json`.
 
 ## License
 
-TBD
+MIT
 
 ## Contributing
 
