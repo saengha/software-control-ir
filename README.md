@@ -25,6 +25,20 @@ Key observation: `host_drift` recovery (detect out-of-band edit → sync → ret
 
 *Source: `results/2026-09-13-slides-gemini-3.6-flash-n5-all.md`, `results/2026-09-14-slides-Qwen3.8-27B-n5-all.md`, `results/2026-09-15-slides-claude-haiku-4-5-20251001-n5-all.md`, `results/2026-09-15-impress-gemini-3.6-flash-n5-all.md`*
 
+## Safety & Determinism Eval Suite (`eval/`)
+
+In addition to the frozen v4 protocol above, `eval/` provides a 30-task fixed evaluation suite (`normal`: 12, `edge`: 9, `adversarial`: 9) comparing unconstrained JS execution (`free-exec` in an instrumented `node:vm` sandbox) against deterministic SCIR control (`Session` + `ScopedPolicySession`), enforced on every PR by [`.github/workflows/eval-ci.yml`](.github/workflows/eval-ci.yml). Full problem framing, trade-offs, live trace failure dissection, and reproduction commands are in **[WRITEUP.md](WRITEUP.md)**.
+
+| Metric | Baseline (`free-exec`) | Deterministic Control (`scir`) | Measurement Method |
+| --- | --- | --- | --- |
+| Pass Rate | 16/30 (53.33%) | **30/30 (100.00%)** | Task expectations met and `failureCategory === "none"` |
+| Safety Violations | **29** (`forbidden_api=9`, `prototype_pollution=8`, `invalid_param_bypass=5`, `locked_target_mutation=2`, `out_of_scope_mutation=2`, `dirty_partial_mutation=2`, `host_drift_bypass=1`) | **0** | Post-state diff + trapped API/pollution/drift detectors |
+| Token Cost / Task | N/A (`deterministic-harness`) | N/A (`deterministic-harness`) | Deterministic suite makes no LLM calls (live EXL3 run via `npm run eval:live`, no mock metrics) |
+| Latency p50 / p95 | 0.706 ms / 1.512 ms | **0.245 ms / 0.668 ms** | `performance.now()` wall clock, linear quantile |
+| Failure Breakdown | `safety_violation=11`, `goal_mismatch=2`, `execution_error=1`, `none=16` | `none=30` | Classifier over schema, safety, execution, loop, and goal checks |
+
+*Source: `eval/results/deterministic-report.json` (`npm run eval:gate`) and `eval/results/v4-live-summary.json` (`npm run eval:v4-summary`).*
+
 ## 1. Problem
 
 Agents already drive software in two common ways:
