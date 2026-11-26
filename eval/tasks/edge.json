@@ -1,0 +1,203 @@
+[
+  {
+    "id": "edge-min-size",
+    "tag": "edge",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Resize to the minimum box",
+    "goal": "Resize the accent bar to the minimum accepted width and height of 8.",
+    "prompt": "Resize accent_01 to width 8 and height 8. That is the catalog minimum, so the edit is valid.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "resize",
+          "target": "accent_01",
+          "params": { "width": 8, "height": 8 }
+        }
+      }
+    ],
+    "baselineCode": "const accent = find(\"accent_01\"); accent.properties.width = 8; accent.properties.height = 8;",
+    "expect": {
+      "properties": [
+        { "id": "accent_01", "path": "properties.width", "equals": 8 },
+        { "id": "accent_01", "path": "properties.height", "equals": 8 }
+      ],
+      "unchangedIds": ["logo_01", "title_01"]
+    }
+  },
+  {
+    "id": "edge-empty-text",
+    "tag": "edge",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Clear the title text",
+    "goal": "Set the title text to an empty string.",
+    "prompt": "Set title_01 text to an empty string. An empty string is a valid text value.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "" }
+        }
+      }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"\";",
+    "expect": {
+      "properties": [{ "id": "title_01", "path": "properties.text", "equals": "" }],
+      "unchangedIds": ["logo_01", "accent_01"]
+    }
+  },
+  {
+    "id": "edge-stale-revision",
+    "tag": "edge",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Reject a stale revision",
+    "goal": "Reject a set_text that claims expectedRevision 99 and leave the document unchanged.",
+    "prompt": "Attempt to set title_01 to \"Stale write\" with expectedRevision 99. The session is at revision 0, so the edit must be rejected and the title must stay \"Quarterly Review\".",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "Stale write" },
+          "expectedRevision": 99
+        }
+      }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"Stale write\";",
+    "expect": { "documentUnchanged": true }
+  },
+  {
+    "id": "edge-delete-parent",
+    "tag": "edge",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Reject deleting a slide that has children",
+    "goal": "Reject deletion of slide_01 because it still has children, and keep the slide.",
+    "prompt": "Try to delete slide_01. It still has child shapes, so the deletion must be rejected and slide_01 must remain.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": { "action": "delete", "target": "slide_01", "params": {} }
+      }
+    ],
+    "baselineCode": "state.objects = state.objects.filter((object) => object.id !== \"slide_01\");",
+    "expect": {
+      "documentUnchanged": true,
+      "present": ["slide_01", "title_01", "accent_01", "logo_01"]
+    }
+  },
+  {
+    "id": "edge-unknown-target",
+    "tag": "edge",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Reject an unknown target",
+    "goal": "Reject set_text on a target that does not exist and leave the document unchanged.",
+    "prompt": "Try to set text on object id does_not_exist. The target is unknown, so nothing in the document may change.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "does_not_exist",
+          "params": { "value": "Nope" }
+        }
+      }
+    ],
+    "baselineCode": "const object = find(\"does_not_exist\"); if (!object) throw new Error(\"unknown_target\"); object.properties.text = \"Nope\";",
+    "expect": { "documentUnchanged": true, "absent": ["does_not_exist"] }
+  },
+  {
+    "id": "edge-type-mismatch",
+    "tag": "edge",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Reject set_text on a slide",
+    "goal": "Reject set_text on slide_01 because a slide is not a shape, and do not add a text property.",
+    "prompt": "Try to set_text on slide_01. Slides are not text shapes, so the action must be rejected and slide_01 must not gain a text property.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "slide_01",
+          "params": { "value": "not a shape" }
+        }
+      }
+    ],
+    "baselineCode": "find(\"slide_01\").properties.text = \"not a shape\";",
+    "expect": { "documentUnchanged": true }
+  },
+  {
+    "id": "edge-undo-at-zero",
+    "tag": "edge",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Undo at revision 0",
+    "goal": "Reject undo when the session is already at revision 0 and leave the document unchanged.",
+    "prompt": "Call undo before any edit. There is nothing to undo, so the document must stay at its initial revision.",
+    "scirPlan": [{ "op": "undo" }],
+    "baselineCode": "undo();",
+    "expect": { "documentUnchanged": true }
+  },
+  {
+    "id": "edge-partial-transaction",
+    "tag": "edge",
+    "difficulty": "hard",
+    "preset": "board",
+    "title": "Roll back a partial transaction",
+    "goal": "Attempt a transaction whose last action recolors the locked logo, and roll the whole batch back.",
+    "prompt": "In one transaction, set the title to \"Should Rollback\", recolor accent_01 to #112233, and recolor locked logo_01 to #112233. The logo edit cannot apply, so the whole batch must roll back and the document must be unchanged.",
+    "scirPlan": [
+      {
+        "op": "transaction",
+        "actions": [
+          {
+            "action": "set_text",
+            "target": "title_01",
+            "params": { "value": "Should Rollback" }
+          },
+          {
+            "action": "set_fill",
+            "target": "accent_01",
+            "params": { "value": "#112233" }
+          },
+          {
+            "action": "set_fill",
+            "target": "logo_01",
+            "params": { "value": "#112233" }
+          }
+        ]
+      }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"Should Rollback\"; find(\"accent_01\").properties.fill = \"#112233\"; throw new Error(\"partial failure\");",
+    "expect": {
+      "documentUnchanged": true,
+      "rolledBack": true,
+      "properties": [
+        { "id": "title_01", "path": "properties.text", "equals": "Quarterly Review" },
+        { "id": "accent_01", "path": "properties.fill", "equals": "#e6a23c" },
+        { "id": "logo_01", "path": "properties.fill", "equals": "#8fd0c4" },
+        { "id": "logo_01", "path": "properties.locked", "equals": true }
+      ]
+    }
+  },
+  {
+    "id": "edge-idempotent-sync",
+    "tag": "edge",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Sync when nothing drifted",
+    "goal": "Call sync when the host has not diverged and leave the document unchanged.",
+    "prompt": "Call sync. The host has not changed out of band, so the document and revision must stay as they are.",
+    "scirPlan": [{ "op": "sync" }],
+    "baselineCode": "sync();",
+    "expect": { "documentUnchanged": true, "syncedDrift": false }
+  }
+]

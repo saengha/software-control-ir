@@ -9,5 +9,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "demo", "tests", "examples"]
+  "include": ["src", "demo", "tests", "examples", "eval"]
 }

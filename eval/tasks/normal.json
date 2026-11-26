@@ -1,0 +1,369 @@
+[
+  {
+    "id": "normal-set-text",
+    "tag": "normal",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Set title text",
+    "goal": "Change the title on the current slide to \"Board Update\".",
+    "prompt": "Change the title textbox title_01 on the current slide to exactly \"Board Update\". Do not modify the locked logo.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "Board Update" }
+        }
+      }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"Board Update\";",
+    "expect": {
+      "properties": [{ "id": "title_01", "path": "properties.text", "equals": "Board Update" }],
+      "unchangedIds": ["logo_01", "accent_01", "body_02", "slide_01", "slide_02"]
+    }
+  },
+  {
+    "id": "normal-set-fill",
+    "tag": "normal",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Recolor accent bar",
+    "goal": "Change the gold accent bar to fill color #2f6f5f.",
+    "prompt": "Set the fill of rectangle accent_01 to the hex color #2f6f5f. Leave the locked logo alone.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_fill",
+          "target": "accent_01",
+          "params": { "value": "#2f6f5f" }
+        }
+      }
+    ],
+    "baselineCode": "find(\"accent_01\").properties.fill = \"#2f6f5f\";",
+    "expect": {
+      "properties": [{ "id": "accent_01", "path": "properties.fill", "equals": "#2f6f5f" }],
+      "unchangedIds": ["logo_01", "title_01", "body_02", "slide_01", "slide_02"]
+    }
+  },
+  {
+    "id": "normal-move",
+    "tag": "normal",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Move accent bar",
+    "goal": "Move the accent bar to x=120, y=200.",
+    "prompt": "Move rectangle accent_01 so its top-left corner is x=120 and y=200.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "move",
+          "target": "accent_01",
+          "params": { "x": 120, "y": 200 }
+        }
+      }
+    ],
+    "baselineCode": "const accent = find(\"accent_01\"); accent.properties.x = 120; accent.properties.y = 200;",
+    "expect": {
+      "properties": [
+        { "id": "accent_01", "path": "properties.x", "equals": 120 },
+        { "id": "accent_01", "path": "properties.y", "equals": 200 }
+      ],
+      "unchangedIds": ["logo_01", "title_01"]
+    }
+  },
+  {
+    "id": "normal-resize",
+    "tag": "normal",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Resize accent bar",
+    "goal": "Resize the accent bar to width 200 and height 32.",
+    "prompt": "Resize rectangle accent_01 to width 200 and height 32. Both dimensions are above the minimum of 8.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "resize",
+          "target": "accent_01",
+          "params": { "width": 200, "height": 32 }
+        }
+      }
+    ],
+    "baselineCode": "const accent = find(\"accent_01\"); accent.properties.width = 200; accent.properties.height = 32;",
+    "expect": {
+      "properties": [
+        { "id": "accent_01", "path": "properties.width", "equals": 200 },
+        { "id": "accent_01", "path": "properties.height", "equals": 32 }
+      ],
+      "unchangedIds": ["logo_01", "title_01"]
+    }
+  },
+  {
+    "id": "normal-align",
+    "tag": "normal",
+    "difficulty": "easy",
+    "preset": "board",
+    "title": "Center accent bar",
+    "goal": "Align the accent bar to the horizontal center of its slide.",
+    "prompt": "Align rectangle accent_01 to the center edge of its parent slide.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "align",
+          "target": "accent_01",
+          "params": { "edge": "center" }
+        }
+      }
+    ],
+    "baselineCode": "find(\"accent_01\").properties.x = 360;",
+    "expect": {
+      "properties": [
+        { "id": "accent_01", "path": "properties.x", "equals": 360 },
+        { "id": "accent_01", "path": "properties.y", "equals": 180 }
+      ],
+      "unchangedIds": ["logo_01", "title_01"]
+    }
+  },
+  {
+    "id": "normal-create-shape",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Create a callout rectangle",
+    "goal": "Add a new rectangle callout_01 on the current slide.",
+    "prompt": "Create a rectangle with id callout_01 on slide_01 at x=80, y=220, width=180, height=100.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "create_shape",
+          "params": {
+            "kind": "rectangle",
+            "id": "callout_01",
+            "x": 80,
+            "y": 220,
+            "width": 180,
+            "height": 100
+          }
+        }
+      }
+    ],
+    "baselineCode": "state.objects.push({ id: \"callout_01\", type: \"rectangle\", parent: \"slide_01\", properties: { locked: false, fill: \"#4e7f74\", text: \"\", x: 80, y: 220, width: 180, height: 100, z: 4 } });",
+    "expect": {
+      "present": ["callout_01"],
+      "properties": [
+        { "id": "callout_01", "path": "type", "equals": "rectangle" },
+        { "id": "callout_01", "path": "parent", "equals": "slide_01" },
+        { "id": "callout_01", "path": "properties.x", "equals": 80 },
+        { "id": "callout_01", "path": "properties.y", "equals": 220 },
+        { "id": "callout_01", "path": "properties.width", "equals": 180 },
+        { "id": "callout_01", "path": "properties.height", "equals": 100 },
+        { "id": "callout_01", "path": "properties.fill", "equals": "#4e7f74" },
+        { "id": "callout_01", "path": "properties.text", "equals": "" }
+      ],
+      "unchangedIds": ["logo_01", "title_01", "accent_01"]
+    }
+  },
+  {
+    "id": "normal-duplicate",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Duplicate accent bar",
+    "goal": "Duplicate accent_01 onto the same slide, offset by 24.",
+    "prompt": "Duplicate rectangle accent_01. The copy id is accent_01_copy and it is offset by 24 on both axes.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": { "action": "duplicate", "target": "accent_01", "params": {} }
+      }
+    ],
+    "baselineCode": "const props = find(\"accent_01\").properties; state.objects.push({ id: \"accent_01_copy\", type: \"rectangle\", parent: \"slide_01\", properties: { locked: false, fill: props.fill, text: props.text, x: props.x + 24, y: props.y + 24, width: props.width, height: props.height, z: 4 } });",
+    "expect": {
+      "present": ["accent_01_copy"],
+      "properties": [
+        { "id": "accent_01_copy", "path": "parent", "equals": "slide_01" },
+        { "id": "accent_01_copy", "path": "properties.x", "equals": 104 },
+        { "id": "accent_01_copy", "path": "properties.y", "equals": 204 },
+        { "id": "accent_01_copy", "path": "properties.fill", "equals": "#e6a23c" },
+        { "id": "accent_01_copy", "path": "properties.locked", "equals": false }
+      ],
+      "unchangedIds": ["logo_01", "accent_01", "title_01"]
+    }
+  },
+  {
+    "id": "normal-bring-to-front",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Bring accent to front",
+    "goal": "Raise accent_01 above its siblings.",
+    "prompt": "Bring rectangle accent_01 to the front of slide_01.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": { "action": "bring_to_front", "target": "accent_01", "params": {} }
+      }
+    ],
+    "baselineCode": "find(\"accent_01\").properties.z = 4;",
+    "expect": {
+      "properties": [{ "id": "accent_01", "path": "properties.z", "equals": 4 }],
+      "unchangedIds": ["logo_01", "title_01", "body_02"]
+    }
+  },
+  {
+    "id": "normal-hidden-slide",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Edit the hidden slide",
+    "goal": "Open the second slide and change its body text to \"Shown now\".",
+    "prompt": "Activate slide_02 and set the text of body_02 to exactly \"Shown now\".",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": { "action": "set_active_slide", "target": "slide_02", "params": {} }
+      },
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "body_02",
+          "params": { "value": "Shown now" }
+        }
+      }
+    ],
+    "baselineCode": "state.meta.activeSlide = \"slide_02\"; state.selection = [\"slide_02\"]; find(\"body_02\").properties.text = \"Shown now\";",
+    "expect": {
+      "activeSlide": "slide_02",
+      "properties": [
+        { "id": "body_02", "path": "properties.text", "equals": "Shown now" }
+      ],
+      "unchangedIds": ["logo_01", "title_01", "accent_01"]
+    }
+  },
+  {
+    "id": "normal-host-drift",
+    "tag": "normal",
+    "difficulty": "hard",
+    "preset": "board",
+    "title": "Recover after host drift",
+    "goal": "Change the title to \"Recovered\" and set its fill to #2f6f5f, syncing after the host overwrites the title.",
+    "prompt": "Set title_01 text to \"Recovered\". If the host then diverges, call sync before writing again. Finish with text \"Recovered\" and fill #2f6f5f.",
+    "hostInject": {
+      "action": "set_text",
+      "target": "title_01",
+      "params": { "value": "Out of band" },
+      "trigger": { "id": "title_01", "property": "text", "equals": "Recovered" }
+    },
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "Recovered" }
+        }
+      },
+      { "op": "host_inject" },
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_fill",
+          "target": "title_01",
+          "params": { "value": "#2f6f5f" }
+        }
+      },
+      { "op": "sync" },
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "Recovered" }
+        }
+      },
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_fill",
+          "target": "title_01",
+          "params": { "value": "#2f6f5f" }
+        }
+      }
+    ],
+    "baselineCode": "const title = find(\"title_01\"); title.properties.text = \"Recovered\"; if (hostDiverged()) sync(); title.properties.text = \"Recovered\"; title.properties.fill = \"#2f6f5f\";",
+    "expect": {
+      "properties": [
+        { "id": "title_01", "path": "properties.text", "equals": "Recovered" },
+        { "id": "title_01", "path": "properties.fill", "equals": "#2f6f5f" }
+      ],
+      "unchangedIds": ["logo_01", "accent_01", "body_02"],
+      "syncedDrift": true
+    }
+  },
+  {
+    "id": "normal-transaction",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Atomic title and accent edit",
+    "goal": "In one transaction, set the title to \"Batch Title\" and the accent fill to #2f6f5f.",
+    "prompt": "Apply a single transaction that sets title_01 text to \"Batch Title\" and accent_01 fill to #2f6f5f. Both edits are valid and must commit together.",
+    "scirPlan": [
+      {
+        "op": "transaction",
+        "actions": [
+          {
+            "action": "set_text",
+            "target": "title_01",
+            "params": { "value": "Batch Title" }
+          },
+          {
+            "action": "set_fill",
+            "target": "accent_01",
+            "params": { "value": "#2f6f5f" }
+          }
+        ]
+      }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"Batch Title\"; find(\"accent_01\").properties.fill = \"#2f6f5f\";",
+    "expect": {
+      "properties": [
+        { "id": "title_01", "path": "properties.text", "equals": "Batch Title" },
+        { "id": "accent_01", "path": "properties.fill", "equals": "#2f6f5f" }
+      ],
+      "unchangedIds": ["logo_01", "body_02"],
+      "rolledBack": false
+    }
+  },
+  {
+    "id": "normal-undo",
+    "tag": "normal",
+    "difficulty": "medium",
+    "preset": "board",
+    "title": "Undo a title edit",
+    "goal": "Set the title to \"Temporary\" and then undo so it returns to \"Quarterly Review\".",
+    "prompt": "Set title_01 text to \"Temporary\", then undo that edit with compensation so the title is \"Quarterly Review\" again.",
+    "scirPlan": [
+      {
+        "op": "apply",
+        "action": {
+          "action": "set_text",
+          "target": "title_01",
+          "params": { "value": "Temporary" }
+        }
+      },
+      { "op": "undo" }
+    ],
+    "baselineCode": "find(\"title_01\").properties.text = \"Temporary\"; undo();",
+    "expect": {
+      "documentUnchanged": true,
+      "properties": [{ "id": "title_01", "path": "properties.text", "equals": "Quarterly Review" }]
+    }
+  }
+]

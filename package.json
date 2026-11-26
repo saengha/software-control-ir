@@ -32,7 +32,11 @@
     "compare:claude": "tsx examples/compare.ts --repeats=5 --adapter=slides",
     "compare:probe-diverged": "tsx examples/probe-host-diverged.ts --repeats=3",
     "migrate:experiment": "tsx examples/migrate-experiment.ts",
-    "fixture:impress-contrast": "tsx examples/write-contrast-odp.ts"
+    "fixture:impress-contrast": "tsx examples/write-contrast-odp.ts",
+    "eval:deterministic": "tsx eval/cli.ts --mode=deterministic",
+    "eval:gate": "tsx eval/cli.ts --mode=gate",
+    "eval:v4-summary": "tsx eval/cli.ts --mode=v4-summary",
+    "eval:live": "tsx eval/cli.ts --mode=live"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
